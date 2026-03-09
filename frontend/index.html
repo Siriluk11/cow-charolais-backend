@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>แอปสแกนหน้าวัว</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 16px;
+        }
+
+        video,
+        canvas,
+        img {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: #ddd;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #1f7aec;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #1667cc;
+        }
+
+        .result {
+            margin-top: 16px;
+            padding: 14px;
+            background: #f0f4ff;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .stars {
+            font-size: 28px;
+            color: #f5b301;
+            margin: 8px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #666;
+            margin: 8px 0 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>แอปสแกนหน้าวัว</h1>
+        <p>เปิดกล้อง ถ่ายภาพ และให้ AI ประเมินผลเป็นดาว</p>
+
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" class="hidden"></canvas>
+
+        <button id="startCamera">เปิดกล้อง</button>
+        <button id="captureBtn">ถ่ายภาพและวิเคราะห์</button>
+
+        <div class="status" id="status">สถานะ: ยังไม่ได้เปิดกล้อง</div>
+
+        <img id="preview" class="hidden" alt="ภาพที่ถ่าย" />
+
+        <div class="result hidden" id="resultBox">
+            <strong>ผลการวิเคราะห์</strong>
+            <div class="stars" id="stars">-</div>
+            <div id="message">-</div>
+            <div id="confidence">-</div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const preview = document.getElementById("preview");
+        const startCameraBtn = document.getElementById("startCamera");
+        const captureBtn = document.getElementById("captureBtn");
+        const statusText = document.getElementById("status");
+        const resultBox = document.getElementById("resultBox");
+        const starsText = document.getElementById("stars");
+        const messageText = document.getElementById("message");
+        const confidenceText = document.getElementById("confidence");
+
+        const API_URL = "https://cow-charolais-backend.onrender.com/predict";
+
+        let stream = null;
+
+        function renderStars(count) {
+            return "⭐".repeat(count || 0);
+        }
+
+        startCameraBtn.addEventListener("click", async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: "environment" }
+                    },
+                    audio: false
+                });
+
+                video.srcObject = stream;
+                statusText.textContent = "สถานะ: เปิดกล้องแล้ว";
+            } catch (error) {
+                statusText.textContent = "สถานะ: เปิดกล้องไม่สำเร็จ";
+                alert("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง");
+            }
+        });
+
+        captureBtn.addEventListener("click", async () => {
+            if (!video.srcObject) {
+                alert("กรุณาเปิดกล้องก่อน");
+                return;
+            }
+
+            statusText.textContent = "สถานะ: กำลังถ่ายภาพและส่งไปวิเคราะห์...";
+
+            const width = video.videoWidth;
+            const height = video.videoHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, width, height);
+
+            preview.src = canvas.toDataURL("image/jpeg", 0.9);
+            preview.classList.remove("hidden");
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append("file", blob, "capture.jpg");
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    resultBox.classList.remove("hidden");
+
+                    if (!response.ok) {
+                        starsText.textContent = "เกิดข้อผิดพลาด";
+                        messageText.textContent = `ข้อความ: ${data.detail || "API ทำงานไม่สำเร็จ"}`;
+                        confidenceText.textContent = "";
+                        statusText.textContent = "สถานะ: วิเคราะห์ไม่สำเร็จ";
+                        return;
+                    }
+
+                    if (data.detected) {
+                        starsText.textContent = renderStars(data.stars);
+                        messageText.textContent = `ข้อความ: ${data.message}`;
+                        confidenceText.textContent = `Confidence: ${data.confidence}`;
+                        statusText.textContent = "สถานะ: วิเคราะห์สำเร็จ";
+                    } else {
+                        starsText.textContent = "ไม่มีผลลัพธ์";
+                        messageText.textContent = `ข้อความ: ${data.message}`;
+                        confidenceText.textContent = "Confidence: -";
+                        statusText.textContent = "สถานะ: ไม่พบหน้าวัว";
+                    }
+                } catch (error) {
+                    resultBox.classList.remove("hidden");
+                    starsText.textContent = "เกิดข้อผิดพลาด";
+                    messageText.textContent = "เชื่อมต่อ API ไม่สำเร็จ";
+                    confidenceText.textContent = "";
+                    statusText.textContent = "สถานะ: วิเคราะห์ไม่สำเร็จ";
+                }
+            }, "image/jpeg", 0.9);
+        });
+    </script>
+</body>
+
+</html>
