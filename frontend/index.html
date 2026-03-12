@@ -4,208 +4,890 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>แอปสแกนหน้าวัว</title>
+    <title>Charolais AI Scan</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --green-dark: #14532d;
+            --green-main: #16a34a;
+            --green-light: #22c55e;
+            --green-soft: #dcfce7;
+            --green-bg: #f0fdf4;
+            --text-main: #1f2937;
+            --text-soft: #6b7280;
+            --white: #ffffff;
+            --danger: #ef4444;
+            --warning-bg: #fef3c7;
+            --warning-text: #92400e;
+            --shadow-main: 0 16px 40px rgba(20, 83, 45, 0.12);
+            --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+        }
+
+        html,
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
+            background: linear-gradient(180deg, #f6fff7 0%, #effcf2 100%);
+            color: var(--text-main);
             text-align: center;
+            min-height: 100%;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 28%),
+                radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.10), transparent 28%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
-            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 26px 16px 100px;
+        }
+
+        .app-header {
+            margin-bottom: 20px;
+        }
+
+        .logo-circle {
+            width: 86px;
+            height: 86px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green-dark), var(--green-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            color: #fff;
+            box-shadow: 0 14px 30px rgba(34, 197, 94, 0.25);
+            border: 4px solid rgba(255, 255, 255, 0.7);
         }
 
         h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+            margin: 0 0 6px;
+            font-size: 33px;
+            line-height: 1.2;
+            color: var(--green-dark);
+            font-weight: 700;
+            letter-spacing: 0.2px;
         }
 
-        p {
-            color: #555;
-            margin-bottom: 16px;
+        .subtitle {
+            margin: 0;
+            font-size: 15px;
+            color: #4b5563;
+            font-weight: 400;
+        }
+
+        .camera-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 430px;
+            aspect-ratio: 3 / 4;
+            margin: 20px auto 0;
+            background: #03130a;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-main);
+            border: 3px solid rgba(34, 197, 94, 0.14);
         }
 
         video,
-        canvas,
-        img {
+        canvas {
+            position: absolute;
+            inset: 0;
             width: 100%;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            background: #ddd;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-xl);
+        }
+
+        #overlayCanvas {
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .scan-frame {
+            position: absolute;
+            width: 68%;
+            height: 62%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid var(--green-light);
+            border-radius: 28px;
+            box-shadow:
+                0 0 0 9999px rgba(0, 0, 0, 0.20),
+                0 0 24px rgba(34, 197, 94, 0.55),
+                inset 0 0 14px rgba(34, 197, 94, 0.25);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .scan-corner {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border: 4px solid #86efac;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .corner-tl {
+            top: 18.5%;
+            left: 16.2%;
+            border-right: none;
+            border-bottom: none;
+            border-top-left-radius: 14px;
+        }
+
+        .corner-tr {
+            top: 18.5%;
+            right: 16.2%;
+            border-left: none;
+            border-bottom: none;
+            border-top-right-radius: 14px;
+        }
+
+        .corner-bl {
+            bottom: 18.5%;
+            left: 16.2%;
+            border-right: none;
+            border-top: none;
+            border-bottom-left-radius: 14px;
+        }
+
+        .corner-br {
+            bottom: 18.5%;
+            right: 16.2%;
+            border-left: none;
+            border-top: none;
+            border-bottom-right-radius: 14px;
+        }
+
+        .scan-line {
+            position: absolute;
+            left: 16%;
+            width: 68%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #86efac, transparent);
+            top: 20%;
+            z-index: 2;
+            animation: scanMove 2.3s linear infinite;
+            box-shadow: 0 0 12px rgba(134, 239, 172, 0.9);
+            pointer-events: none;
+            border-radius: 999px;
+        }
+
+        @keyframes scanMove {
+            0% {
+                top: 20%;
+                opacity: 1;
+            }
+
+            50% {
+                top: 77%;
+                opacity: 0.95;
+            }
+
+            100% {
+                top: 20%;
+                opacity: 1;
+            }
+        }
+
+        .guide-text {
+            margin-top: 14px;
+            font-size: 14px;
+            color: var(--green-dark);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.8);
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid #d1fae5;
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.08);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .page-links {
+            margin-top: 12px;
         }
 
         button {
-            width: 100%;
-            padding: 14px;
             border: none;
-            border-radius: 12px;
-            background: #1f7aec;
-            color: white;
-            font-size: 16px;
+            border-radius: 16px;
+            padding: 13px 18px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            font-family: 'Prompt', sans-serif;
+            min-width: 136px;
         }
 
         button:hover {
-            background: #1667cc;
+            transform: translateY(-2px);
         }
 
-        .result {
-            margin-top: 16px;
-            padding: 14px;
-            background: #f0f4ff;
-            border-radius: 12px;
-            text-align: left;
+        button:active {
+            transform: translateY(0);
         }
 
-        .stars {
-            font-size: 28px;
-            color: #f5b301;
-            margin: 8px 0;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green-dark), var(--green-light));
+            color: #fff;
+            box-shadow: 0 10px 18px rgba(34, 197, 94, 0.22);
         }
 
-        .hidden {
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--green-dark);
+            border: 1px solid #bbf7d0;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 10px 18px rgba(239, 68, 68, 0.18);
+        }
+
+        .loading-box {
             display: none;
+            margin: 18px auto 0;
+            padding: 16px;
+            max-width: 320px;
+            border-radius: 18px;
+            background: rgba(236, 253, 245, 0.96);
+            color: var(--green-dark);
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.12);
+            border: 1px solid #bbf7d0;
+        }
+
+        .spinner {
+            margin: 0 auto 10px;
+            border: 5px solid #d1fae5;
+            border-top: 5px solid var(--green-main);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-card,
+        .history-card {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            box-shadow: var(--shadow-soft);
+            text-align: left;
+            border: 1px solid #dcfce7;
+            backdrop-filter: blur(4px);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .card-title .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--green-dark);
+        }
+
+        .result-card h2,
+        .history-card h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--green-dark);
+            font-weight: 700;
         }
 
         .status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.warning {
+            background: var(--warning-bg);
+            color: var(--warning-text);
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        #resultText {
+            line-height: 1.7;
             font-size: 14px;
-            color: #666;
-            margin: 8px 0 14px;
+            color: #374151;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .score-box {
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+            border-radius: 18px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid #d1fae5;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .score-box .label {
+            font-size: 13px;
+            color: var(--text-soft);
+            margin-bottom: 6px;
+        }
+
+        .score-box .value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--green-dark);
+        }
+
+        #capturedImage {
+            width: 100%;
+            border-radius: 18px;
+            margin-top: 14px;
+            border: 1px solid #d1fae5;
+            display: none;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .small-note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-soft);
+            text-align: left;
+            background: #f9fffb;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #e5f9ea;
+            line-height: 1.6;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+            border: 1px solid #d1fae5;
+            border-radius: 16px;
+            padding: 13px;
+            font-size: 14px;
+            line-height: 1.7;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .history-item strong {
+            color: var(--green-dark);
+            font-weight: 600;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #d1fae5;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 6px;
+            backdrop-filter: blur(8px);
+            z-index: 50;
+        }
+
+        .bottom-nav a {
+            text-decoration: none;
+            color: var(--green-dark);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .bottom-nav a.active {
+            color: var(--green-main);
+        }
+
+        @media (max-width: 480px) {
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 29px;
+            }
+
+            .logo-circle {
+                width: 76px;
+                height: 76px;
+                font-size: 38px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>แอปสแกนหน้าวัว</h1>
-        <p>เปิดกล้อง ถ่ายภาพ และให้ AI ประเมินผลเป็นดาว</p>
+        <div class="app-header">
+            <div class="logo-circle">🐄</div>
+            <h1>แอปสแกนหน้าวัว Charolais</h1>
+            <p class="subtitle">ระบบตรวจจับใบหน้าวัวและวิเคราะห์ผลเบื้องต้นด้วย AI</p>
+        </div>
 
-        <video id="video" autoplay playsinline></video>
-        <canvas id="canvas" class="hidden"></canvas>
+        <div class="camera-wrapper">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="overlayCanvas"></canvas>
 
-        <button id="startCamera">เปิดกล้อง</button>
-        <button id="captureBtn">ถ่ายภาพและวิเคราะห์</button>
+            <div class="scan-frame"></div>
+            <div class="scan-corner corner-tl"></div>
+            <div class="scan-corner corner-tr"></div>
+            <div class="scan-corner corner-bl"></div>
+            <div class="scan-corner corner-br"></div>
+            <div class="scan-line"></div>
+        </div>
 
-        <div class="status" id="status">สถานะ: ยังไม่ได้เปิดกล้อง</div>
+        <div class="guide-text">🐄 กรุณาจัดใบหน้าวัวให้อยู่ในกรอบก่อนกดสแกน</div>
 
-        <img id="preview" class="hidden" alt="ภาพที่ถ่าย" />
+        <div class="controls">
+            <button class="btn-primary" id="startCameraBtn">📷 เปิดกล้อง</button>
+            <button class="btn-secondary" id="captureBtn">✨ สแกนภาพ</button>
+            <button class="btn-danger" id="clearHistoryBtn">🗑 ล้างประวัติ</button>
+        </div>
 
-        <div class="result hidden" id="resultBox">
-            <strong>ผลการวิเคราะห์</strong>
-            <div class="stars" id="stars">-</div>
-            <div id="message">-</div>
-            <div id="confidence">-</div>
+        <div class="controls page-links">
+            <button class="btn-secondary" onclick="location.href='dashboard.html'">🏠 Dashboard</button>
+            <button class="btn-secondary" onclick="location.href='history.html'">🕘 History</button>
+            <button class="btn-secondary" onclick="location.href='profile.html'">👤 Profile</button>
+        </div>
+
+        <div class="loading-box" id="loadingBox">
+            <div class="spinner"></div>
+            AI กำลังวิเคราะห์ภาพ...
+        </div>
+
+        <div class="result-card">
+            <div class="card-title">
+                <div class="icon">📊</div>
+                <h2>ผลการวิเคราะห์ล่าสุด</h2>
+            </div>
+
+            <div id="statusBadge" class="status warning">ยังไม่มีผลการวิเคราะห์</div>
+            <div id="resultText">กรุณาเปิดกล้องและกดสแกนภาพ</div>
+
+            <div class="score-grid">
+                <div class="score-box">
+                    <div class="label">Confidence</div>
+                    <div class="value" id="confidenceValue">-</div>
+                </div>
+                <div class="score-box">
+                    <div class="label">Beauty Score</div>
+                    <div class="value" id="beautyScoreValue">-</div>
+                </div>
+            </div>
+
+            <img id="capturedImage" alt="ภาพผลการสแกนล่าสุด" />
+
+            <div class="small-note">
+                หมายเหตุ: Beauty Score เป็นคะแนนต้นแบบสำหรับแอปวิจัย
+                สามารถปรับสูตรภายหลังให้สอดคล้องกับเกณฑ์ประเมินจริงของงานวิทยานิพนธ์ได้
+            </div>
+        </div>
+
+        <div class="history-card">
+            <div class="card-title">
+                <div class="icon">🕘</div>
+                <h2>ประวัติการสแกนล่าสุด</h2>
+            </div>
+
+            <div id="historyList" class="history-list">
+                <div class="history-item">ยังไม่มีประวัติการสแกน</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            Charolais AI Scan • Prototype Version
         </div>
     </div>
 
-    <script>
-        const video = document.getElementById("video");
-        const canvas = document.getElementById("canvas");
-        const preview = document.getElementById("preview");
-        const startCameraBtn = document.getElementById("startCamera");
-        const captureBtn = document.getElementById("captureBtn");
-        const statusText = document.getElementById("status");
-        const resultBox = document.getElementById("resultBox");
-        const starsText = document.getElementById("stars");
-        const messageText = document.getElementById("message");
-        const confidenceText = document.getElementById("confidence");
+    <div class="bottom-nav">
+        <a href="dashboard.html">🏠<br>Home</a>
+        <a href="index.html" class="active">📷<br>Scan</a>
+        <a href="history.html">🕘<br>History</a>
+        <a href="profile.html">👤<br>Profile</a>
+    </div>
 
+    <script>
         const API_URL = "https://cow-charolais-backend.onrender.com/predict";
+
+        const video = document.getElementById("video");
+        const overlayCanvas = document.getElementById("overlayCanvas");
+        const overlayCtx = overlayCanvas.getContext("2d");
+
+        const startCameraBtn = document.getElementById("startCameraBtn");
+        const captureBtn = document.getElementById("captureBtn");
+        const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+        const loadingBox = document.getElementById("loadingBox");
+        const statusBadge = document.getElementById("statusBadge");
+        const resultText = document.getElementById("resultText");
+        const confidenceValue = document.getElementById("confidenceValue");
+        const beautyScoreValue = document.getElementById("beautyScoreValue");
+        const capturedImage = document.getElementById("capturedImage");
+        const historyList = document.getElementById("historyList");
 
         let stream = null;
 
-        function renderStars(count) {
-            return "⭐".repeat(count || 0);
+        function resizeOverlayCanvas() {
+            overlayCanvas.width = video.videoWidth || video.clientWidth;
+            overlayCanvas.height = video.videoHeight || video.clientHeight;
+            overlayCanvas.style.width = "100%";
+            overlayCanvas.style.height = "100%";
         }
 
-        startCameraBtn.addEventListener("click", async () => {
+        async function startCamera() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: { ideal: "environment" }
-                    },
+                    video: { facingMode: "environment" },
                     audio: false
                 });
 
                 video.srcObject = stream;
-                statusText.textContent = "สถานะ: เปิดกล้องแล้ว";
-            } catch (error) {
-                statusText.textContent = "สถานะ: เปิดกล้องไม่สำเร็จ";
-                alert("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง");
-            }
-        });
 
-        captureBtn.addEventListener("click", async () => {
-            if (!video.srcObject) {
-                alert("กรุณาเปิดกล้องก่อน");
+                video.onloadedmetadata = () => {
+                    video.play();
+                    resizeOverlayCanvas();
+                    clearOverlay();
+                };
+            } catch (error) {
+                setStatus("เปิดกล้องไม่สำเร็จ", "error");
+                resultText.innerHTML = "ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้องในเบราว์เซอร์";
+                console.error(error);
+            }
+        }
+
+        function clearOverlay() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+
+        function setStatus(text, type) {
+            statusBadge.textContent = text;
+            statusBadge.className = "status " + type;
+        }
+
+        function calculateBeautyScore(confidence, bbox) {
+            const area = bbox.width * bbox.height;
+            const imageArea = overlayCanvas.width * overlayCanvas.height;
+            const areaRatio = imageArea > 0 ? area / imageArea : 0;
+
+            let score = 5.0;
+            score += Math.min(confidence * 3, 3.0);
+
+            if (areaRatio > 0.08 && areaRatio < 0.45) {
+                score += 1.5;
+            } else if (areaRatio >= 0.45) {
+                score += 0.8;
+            }
+
+            const centerX = bbox.x + bbox.width / 2;
+            const centerY = bbox.y + bbox.height / 2;
+
+            const dx = Math.abs(centerX - overlayCanvas.width / 2) / overlayCanvas.width;
+            const dy = Math.abs(centerY - overlayCanvas.height / 2) / overlayCanvas.height;
+
+            if (dx < 0.08 && dy < 0.08) {
+                score += 1.0;
+            } else if (dx < 0.15 && dy < 0.15) {
+                score += 0.5;
+            }
+
+            score = Math.max(0, Math.min(10, score));
+            return score.toFixed(1);
+        }
+
+        function drawFaceBox(bbox, confidence) {
+            clearOverlay();
+
+            overlayCtx.strokeStyle = "#00ff88";
+            overlayCtx.lineWidth = 5;
+            overlayCtx.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
+
+            overlayCtx.fillStyle = "rgba(0, 255, 136, 0.18)";
+            overlayCtx.fillRect(bbox.x, bbox.y, bbox.width, bbox.height);
+
+            overlayCtx.fillStyle = "#00ff88";
+            overlayCtx.font = "bold 20px Prompt, sans-serif";
+            overlayCtx.fillText(
+                `Cow Face ${(confidence * 100).toFixed(1)}%`,
+                bbox.x,
+                Math.max(24, bbox.y - 10)
+            );
+        }
+
+        function updateResult(imageDataUrl, bbox, confidence, beautyScore) {
+            capturedImage.src = imageDataUrl;
+            capturedImage.style.display = "block";
+
+            confidenceValue.textContent = `${(confidence * 100).toFixed(1)}%`;
+            beautyScoreValue.textContent = `${beautyScore}/10`;
+
+            resultText.innerHTML = `
+                ตรวจพบหน้าวัวสำเร็จ<br>
+                ระบบได้แสดงกรอบใบหน้าที่ตรวจพบบนภาพแล้ว
+            `;
+
+            setStatus("ตรวจพบหน้าวัว", "success");
+            drawFaceBox(bbox, confidence);
+        }
+
+        function updateNoFaceResult(imageDataUrl) {
+            clearOverlay();
+            capturedImage.src = imageDataUrl;
+            capturedImage.style.display = "block";
+
+            confidenceValue.textContent = "-";
+            beautyScoreValue.textContent = "-";
+            resultText.innerHTML = "ไม่พบหน้าวัวในภาพ กรุณาถ่ายใหม่ให้เห็นใบหน้าวัวชัดขึ้น";
+            setStatus("ไม่พบหน้าวัว", "error");
+        }
+
+        function saveHistory(item) {
+            const allowSaveHistory = JSON.parse(localStorage.getItem("saveHistory") ?? "true");
+            if (!allowSaveHistory) return;
+
+            const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
+            history.unshift(item);
+            const latest10 = history.slice(0, 10);
+            localStorage.setItem("scanHistory", JSON.stringify(latest10));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
+
+            if (history.length === 0) {
+                historyList.innerHTML = `<div class="history-item">ยังไม่มีประวัติการสแกน</div>`;
                 return;
             }
 
-            statusText.textContent = "สถานะ: กำลังถ่ายภาพและส่งไปวิเคราะห์...";
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div><strong>วันที่:</strong> ${item.date}</div>
+                    <div><strong>สถานะ:</strong> ${item.status}</div>
+                    <div><strong>Confidence:</strong> ${item.confidence}</div>
+                    <div><strong>Beauty Score:</strong> ${item.beautyScore}</div>
+                </div>
+            `).join("");
+        }
 
-            const width = video.videoWidth;
-            const height = video.videoHeight;
+        function playSuccessSound() {
+            const soundEnabled = JSON.parse(localStorage.getItem("soundAlert") ?? "false");
+            if (!soundEnabled) return;
 
-            canvas.width = width;
-            canvas.height = height;
+            const audio = new Audio("data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTAAAAAA////AAAA////AAAA////AAAA////AAAA////AAAA");
+            audio.play().catch(() => { });
+        }
 
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(video, 0, 0, width, height);
+        async function captureAndAnalyze() {
+            if (!video.srcObject) {
+                setStatus("ยังไม่เปิดกล้อง", "warning");
+                resultText.innerHTML = "กรุณากดปุ่มเปิดกล้องก่อน";
+                return;
+            }
 
-            preview.src = canvas.toDataURL("image/jpeg", 0.9);
-            preview.classList.remove("hidden");
+            const tempCanvas = document.createElement("canvas");
+            const tempCtx = tempCanvas.getContext("2d");
 
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append("file", blob, "capture.jpg");
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
 
-                try {
-                    const response = await fetch(API_URL, {
-                        method: "POST",
-                        body: formData
-                    });
+            const imageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
+            const blob = await (await fetch(imageDataUrl)).blob();
 
-                    const data = await response.json();
+            const formData = new FormData();
+            formData.append("file", blob, "capture.jpg");
 
-                    resultBox.classList.remove("hidden");
+            loadingBox.style.display = "block";
+            clearOverlay();
 
-                    if (!response.ok) {
-                        starsText.textContent = "เกิดข้อผิดพลาด";
-                        messageText.textContent = `ข้อความ: ${data.detail || "API ทำงานไม่สำเร็จ"}`;
-                        confidenceText.textContent = "";
-                        statusText.textContent = "สถานะ: วิเคราะห์ไม่สำเร็จ";
-                        return;
-                    }
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: formData
+                });
 
-                    if (data.detected) {
-                        starsText.textContent = renderStars(data.stars);
-                        messageText.textContent = `ข้อความ: ${data.message}`;
-                        confidenceText.textContent = `Confidence: ${data.confidence}`;
-                        statusText.textContent = "สถานะ: วิเคราะห์สำเร็จ";
-                    } else {
-                        starsText.textContent = "ไม่มีผลลัพธ์";
-                        messageText.textContent = `ข้อความ: ${data.message}`;
-                        confidenceText.textContent = "Confidence: -";
-                        statusText.textContent = "สถานะ: ไม่พบหน้าวัว";
-                    }
-                } catch (error) {
-                    resultBox.classList.remove("hidden");
-                    starsText.textContent = "เกิดข้อผิดพลาด";
-                    messageText.textContent = "เชื่อมต่อ API ไม่สำเร็จ";
-                    confidenceText.textContent = "";
-                    statusText.textContent = "สถานะ: วิเคราะห์ไม่สำเร็จ";
+                if (!response.ok) {
+                    throw new Error("API request failed");
                 }
-            }, "image/jpeg", 0.9);
-        });
+
+                const data = await response.json();
+                console.log("API Response:", data);
+
+                let pred = null;
+
+                if (data.predictions && data.predictions.length > 0) {
+                    pred = data.predictions[0];
+                } else if (data.detections && data.detections.length > 0) {
+                    pred = data.detections[0];
+                } else if (data.prediction) {
+                    pred = data.prediction;
+                }
+
+                if (!pred) {
+                    updateNoFaceResult(imageDataUrl);
+                    saveHistory({
+                        date: new Date().toLocaleString("th-TH"),
+                        status: "ไม่พบหน้าวัว",
+                        confidence: "-",
+                        beautyScore: "-"
+                    });
+                    return;
+                }
+
+                const confidence = Number(pred.confidence || pred.conf || 0);
+
+                if (confidence < 0.50) {
+                    updateNoFaceResult(imageDataUrl);
+                    saveHistory({
+                        date: new Date().toLocaleString("th-TH"),
+                        status: "ไม่พบหน้าวัว",
+                        confidence: `${(confidence * 100).toFixed(1)}%`,
+                        beautyScore: "-"
+                    });
+                    return;
+                }
+
+                const bbox = {
+                    x: Math.max(0, (pred.x || 0) - (pred.width || 0) / 2),
+                    y: Math.max(0, (pred.y || 0) - (pred.height || 0) / 2),
+                    width: pred.width || 0,
+                    height: pred.height || 0
+                };
+
+                const beautyScore = calculateBeautyScore(confidence, bbox);
+
+                updateResult(imageDataUrl, bbox, confidence, beautyScore);
+                playSuccessSound();
+
+                saveHistory({
+                    date: new Date().toLocaleString("th-TH"),
+                    status: "ตรวจพบหน้าวัว",
+                    confidence: `${(confidence * 100).toFixed(1)}%`,
+                    beautyScore: `${beautyScore}/10`
+                });
+
+            } catch (error) {
+                console.error(error);
+                clearOverlay();
+                setStatus("เชื่อมต่อระบบไม่สำเร็จ", "error");
+                resultText.innerHTML = "ไม่สามารถเชื่อมต่อ Backend ได้ กรุณาตรวจสอบเซิร์ฟเวอร์หรือ CORS";
+                confidenceValue.textContent = "-";
+                beautyScoreValue.textContent = "-";
+            } finally {
+                loadingBox.style.display = "none";
+            }
+        }
+
+        function clearHistory() {
+            localStorage.removeItem("scanHistory");
+            renderHistory();
+        }
+
+        const showAnimation = JSON.parse(localStorage.getItem("showAnimation") ?? "true");
+        if (!showAnimation) {
+            const scanLine = document.querySelector(".scan-line");
+            if (scanLine) scanLine.style.display = "none";
+        }
+
+        window.addEventListener("resize", resizeOverlayCanvas);
+        startCameraBtn.addEventListener("click", startCamera);
+        captureBtn.addEventListener("click", captureAndAnalyze);
+        clearHistoryBtn.addEventListener("click", clearHistory);
+
+        renderHistory();
     </script>
 </body>
 

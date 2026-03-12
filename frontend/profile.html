@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile & Settings - Charolais AI Scan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Prompt', sans-serif;
+            background: linear-gradient(180deg, #f6fff7 0%, #effcf2 100%);
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 20px 16px 100px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .logo {
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            background: linear-gradient(135deg, #14532d, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 12px 28px rgba(34, 197, 94, 0.25);
+        }
+
+        h1 {
+            margin: 0;
+            color: #14532d;
+            font-size: 30px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            margin-top: 6px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            border: 1px solid #dcfce7;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .card-title .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #14532d;
+        }
+
+        .card-title h2 {
+            margin: 0;
+            color: #14532d;
+            font-size: 20px;
+        }
+
+        .profile-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .avatar-wrap {
+            position: relative;
+            width: 118px;
+            height: 118px;
+        }
+
+        .avatar {
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #bbf7d0;
+            box-shadow: 0 10px 24px rgba(20, 83, 45, 0.12);
+            background: #f0fdf4;
+            display: block;
+        }
+
+        .avatar-fallback {
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #14532d, #22c55e);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 44px;
+            font-weight: 700;
+            border: 4px solid #bbf7d0;
+            box-shadow: 0 10px 24px rgba(20, 83, 45, 0.12);
+        }
+
+        .upload-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #14532d, #22c55e);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            color: #14532d;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid #bbf7d0;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            outline: none;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+        }
+
+        .save-btn {
+            width: 100%;
+            margin-top: 16px;
+            padding: 13px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #14532d, #22c55e);
+            color: white;
+            font-family: 'Prompt', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(34, 197, 94, 0.2);
+        }
+
+        .save-btn:hover,
+        .upload-btn:hover,
+        .remove-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #ecfdf5;
+            gap: 16px;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .row .label {
+            color: #14532d;
+            font-weight: 600;
+            text-align: left;
+            flex: 1;
+        }
+
+        .row .desc {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            accent-color: #16a34a;
+            cursor: pointer;
+        }
+
+        .danger-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 13px;
+            border: none;
+            border-radius: 16px;
+            background: #ef4444;
+            color: white;
+            font-family: 'Prompt', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .note {
+            margin-top: 10px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 520px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #d1fae5;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 6px;
+            backdrop-filter: blur(8px);
+        }
+
+        .bottom-nav a {
+            text-decoration: none;
+            color: #14532d;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .active {
+            color: #16a34a !important;
+        }
+
+        @media (max-width: 480px) {
+            .btn-row {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .upload-btn,
+            .remove-btn {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🐄</div>
+            <h1>Profile & Settings</h1>
+            <div class="subtitle">จัดการข้อมูลผู้ใช้และตั้งค่าระบบในหน้าเดียว</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <div class="icon">👤</div>
+                <h2>ข้อมูลโปรไฟล์</h2>
+            </div>
+
+            <div class="profile-top">
+                <div class="avatar-wrap">
+                    <img id="profilePreview" class="avatar" alt="Profile Image">
+                    <div id="profileFallback" class="avatar-fallback">🐄</div>
+                </div>
+
+                <div class="btn-row">
+                    <label for="profileImageInput" class="upload-btn">🖼 อัปโหลดรูปโปรไฟล์</label>
+                    <button type="button" class="remove-btn" onclick="removeProfileImage()">🗑 ลบรูป</button>
+                </div>
+
+                <input type="file" id="profileImageInput" accept="image/*">
+            </div>
+
+            <label for="userName">ชื่อผู้ใช้</label>
+            <input type="text" id="userName" placeholder="กรอกชื่อผู้ใช้">
+
+            <label for="farmName">ชื่อฟาร์ม</label>
+            <input type="text" id="farmName" placeholder="กรอกชื่อฟาร์ม">
+
+            <label for="userCode">รหัสผู้ใช้งาน</label>
+            <input type="text" id="userCode" placeholder="กรอกรหัสผู้ใช้">
+
+            <label for="userEmail">อีเมล</label>
+            <input type="email" id="userEmail" placeholder="กรอกอีเมล">
+
+            <button class="save-btn" onclick="saveProfile()">💾 บันทึกโปรไฟล์</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <div class="icon">⚙️</div>
+                <h2>ตั้งค่าระบบ</h2>
+            </div>
+
+            <div class="row">
+                <div class="label">
+                    แสดง Animation
+                    <div class="desc">เปิดเอฟเฟกต์ระหว่างสแกนภาพ</div>
+                </div>
+                <input type="checkbox" id="showAnimation">
+            </div>
+
+            <div class="row">
+                <div class="label">
+                    บันทึกประวัติการสแกน
+                    <div class="desc">เก็บผลการสแกนไว้ในเครื่องนี้</div>
+                </div>
+                <input type="checkbox" id="saveHistory">
+            </div>
+
+            <div class="row">
+                <div class="label">
+                    เปิดเสียงแจ้งเตือน
+                    <div class="desc">มีเสียงเมื่อสแกนเสร็จ</div>
+                </div>
+                <input type="checkbox" id="soundAlert">
+            </div>
+
+            <div class="row">
+                <div class="label">
+                    ภาษาแสดงผล
+                    <div class="desc">เลือกรูปแบบภาษาของแอป</div>
+                </div>
+                <select id="appLanguage" style="max-width: 140px;">
+                    <option value="th">ไทย</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <button class="danger-btn" onclick="clearAllData()">ล้างข้อมูลทั้งหมด</button>
+            <div class="note">การล้างข้อมูลจะลบประวัติการสแกน ข้อมูลโปรไฟล์ และรูปโปรไฟล์ในเบราว์เซอร์นี้</div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html">🏠<br>Home</a>
+        <a href="index.html">📷<br>Scan</a>
+        <a href="history.html">🕘<br>History</a>
+        <a href="profile.html" class="active">👤<br>Profile</a>
+    </div>
+
+    <script>
+        const profilePreview = document.getElementById("profilePreview");
+        const profileFallback = document.getElementById("profileFallback");
+        const profileImageInput = document.getElementById("profileImageInput");
+
+        function loadProfile() {
+            document.getElementById("userName").value = localStorage.getItem("userName") || "";
+            document.getElementById("farmName").value = localStorage.getItem("farmName") || "";
+            document.getElementById("userCode").value = localStorage.getItem("userCode") || "";
+            document.getElementById("userEmail").value = localStorage.getItem("userEmail") || "";
+
+            document.getElementById("showAnimation").checked =
+                JSON.parse(localStorage.getItem("showAnimation") ?? "true");
+
+            document.getElementById("saveHistory").checked =
+                JSON.parse(localStorage.getItem("saveHistory") ?? "true");
+
+            document.getElementById("soundAlert").checked =
+                JSON.parse(localStorage.getItem("soundAlert") ?? "false");
+
+            document.getElementById("appLanguage").value =
+                localStorage.getItem("appLanguage") || "th";
+
+            const savedImage = localStorage.getItem("profileImage");
+            if (savedImage) {
+                profilePreview.src = savedImage;
+                profilePreview.style.display = "block";
+                profileFallback.style.display = "none";
+            } else {
+                profilePreview.style.display = "none";
+                profileFallback.style.display = "flex";
+            }
+        }
+
+        function saveProfile() {
+            localStorage.setItem("userName", document.getElementById("userName").value);
+            localStorage.setItem("farmName", document.getElementById("farmName").value);
+            localStorage.setItem("userCode", document.getElementById("userCode").value);
+            localStorage.setItem("userEmail", document.getElementById("userEmail").value);
+
+            localStorage.setItem("showAnimation", document.getElementById("showAnimation").checked);
+            localStorage.setItem("saveHistory", document.getElementById("saveHistory").checked);
+            localStorage.setItem("soundAlert", document.getElementById("soundAlert").checked);
+            localStorage.setItem("appLanguage", document.getElementById("appLanguage").value);
+
+            alert("บันทึกโปรไฟล์และการตั้งค่าเรียบร้อยแล้ว");
+        }
+
+        profileImageInput.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imageData = e.target.result;
+                localStorage.setItem("profileImage", imageData);
+                profilePreview.src = imageData;
+                profilePreview.style.display = "block";
+                profileFallback.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function removeProfileImage() {
+            localStorage.removeItem("profileImage");
+            profilePreview.removeAttribute("src");
+            profilePreview.style.display = "none";
+            profileFallback.style.display = "flex";
+            profileImageInput.value = "";
+            alert("ลบรูปโปรไฟล์เรียบร้อยแล้ว");
+        }
+
+        document.getElementById("showAnimation").addEventListener("change", e => {
+            localStorage.setItem("showAnimation", e.target.checked);
+        });
+
+        document.getElementById("saveHistory").addEventListener("change", e => {
+            localStorage.setItem("saveHistory", e.target.checked);
+        });
+
+        document.getElementById("soundAlert").addEventListener("change", e => {
+            localStorage.setItem("soundAlert", e.target.checked);
+        });
+
+        document.getElementById("appLanguage").addEventListener("change", e => {
+            localStorage.setItem("appLanguage", e.target.value);
+        });
+
+        function clearAllData() {
+            const confirmClear = confirm("ต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?");
+            if (!confirmClear) return;
+
+            localStorage.clear();
+            alert("ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว");
+            location.reload();
+        }
+
+        loadProfile();
+    </script>
+</body>
+
+</html>

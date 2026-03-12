@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>History - Charolais AI Scan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Prompt', sans-serif;
+            background: linear-gradient(180deg, #f6fff7 0%, #effcf2 100%);
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 16px 90px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #14532d;
+            margin-bottom: 18px;
+        }
+
+        .item {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            border: 1px solid #dcfce7;
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+
+        .item strong {
+            color: #14532d;
+        }
+
+        .empty {
+            text-align: center;
+            color: #6b7280;
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid #dcfce7;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #d1fae5;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            padding: 10px 6px;
+        }
+
+        .bottom-nav a {
+            text-decoration: none;
+            color: #14532d;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .active {
+            color: #16a34a !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🕘 History</h1>
+        <div id="historyList"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html">🏠<br>Home</a>
+        <a href="index.html">📷<br>Scan</a>
+        <a href="history.html" class="active">🕘<br>History</a>
+        <a href="profile.html">👤<br>Profile</a>
+    </div>
+
+    <script>
+        const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
+        const historyList = document.getElementById("historyList");
+
+        if (history.length === 0) {
+            historyList.innerHTML = '<div class="empty">ยังไม่มีประวัติการสแกน</div>';
+        } else {
+            historyList.innerHTML = history.map(item => `
+        <div class="item">
+          <div><strong>วันที่:</strong> ${item.date || "-"}</div>
+          <div><strong>สถานะ:</strong> ${item.status || "-"}</div>
+          <div><strong>Confidence:</strong> ${item.confidence || "-"}</div>
+          <div><strong>Beauty Score:</strong> ${item.beautyScore || "-"}</div>
+        </div>
+      `).join("");
+        }
+    </script>
+</body>
+
+</html>
