@@ -16,9 +16,13 @@
         }
 
         :root {
-            --green-dark: #14532d;
+            --green-dark: #0f5132;
             --green-main: #16a34a;
-            --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+            --green-light: #22c55e;
+            --text-main: #1f2937;
+            --text-soft: #6b7280;
+            --card-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+            --soft-shadow: 0 10px 24px rgba(20, 83, 45, 0.10);
         }
 
         html,
@@ -27,131 +31,290 @@
             padding: 0;
             min-height: 100dvh;
             font-family: 'Prompt', sans-serif;
-            background: linear-gradient(180deg, #f6fff7 0%, #effcf2 100%);
-            color: #1f2937;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
             background:
-                radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 28%),
-                radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 24%),
-                radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.10), transparent 28%);
-            pointer-events: none;
-            z-index: 0;
+                radial-gradient(circle at top left, rgba(34, 197, 94, 0.10), transparent 25%),
+                radial-gradient(circle at bottom right, rgba(22, 163, 74, 0.08), transparent 28%),
+                linear-gradient(180deg, #f7fff8 0%, #eef8f1 100%);
+            color: var(--text-main);
         }
 
-        .container {
-            position: relative;
-            z-index: 1;
+        .app {
             max-width: 500px;
             margin: 0 auto;
-            padding: 26px 16px 120px;
-            min-height: calc(100dvh - 20px);
+            min-height: 100dvh;
+            padding: 22px 16px 120px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+        .hero {
+            background: linear-gradient(135deg, #14532d 0%, #22c55e 100%);
+            border-radius: 32px;
+            padding: 24px 20px 22px;
+            color: white;
+            box-shadow: 0 18px 40px rgba(22, 163, 74, 0.22);
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo {
-            width: 86px;
-            height: 86px;
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
-            margin: 0 auto 14px;
-            background: linear-gradient(135deg, #14532d, #22c55e);
+            background: rgba(255, 255, 255, 0.08);
+            top: -60px;
+            right: -60px;
+        }
+
+        .hero-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .hero-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .hero-icon {
+            width: 66px;
+            height: 66px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.22);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 42px;
-            color: white;
-            box-shadow: 0 14px 30px rgba(34, 197, 94, 0.25);
-            border: 4px solid rgba(255, 255, 255, 0.7);
-        }
-
-        h1 {
-            margin: 0;
-            color: #14532d;
             font-size: 32px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #6b7280;
-            font-size: 14px;
-            margin-top: 6px;
-            margin-bottom: 20px;
-        }
-
-        .item {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 22px;
-            padding: 18px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid #dcfce7;
-            margin-bottom: 14px;
-            line-height: 1.8;
-        }
-
-        .item strong {
-            color: #14532d;
-        }
-
-        .empty {
-            text-align: center;
-            color: #6b7280;
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 22px;
-            padding: 22px;
-            border: 1px solid #dcfce7;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 500px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.96);
-            border-top: 1px solid #d1fae5;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
             backdrop-filter: blur(8px);
-            z-index: 50;
         }
 
-        .bottom-nav a {
-            text-decoration: none;
-            color: #14532d;
+        .hero h1 {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.1;
+            font-weight: 700;
+        }
+
+        .hero p {
+            margin: 6px 0 0;
+            font-size: 13px;
+            opacity: 0.92;
+        }
+
+        .hero-badge {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 10px 14px;
+            border-radius: 16px;
             text-align: center;
+            min-width: 84px;
+            backdrop-filter: blur(8px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge .small {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .hero-badge .big {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .section {
+            margin-top: 18px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--green-dark);
+        }
+
+        .section-title span {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(220, 252, 231, 0.95);
+            box-shadow: var(--card-shadow);
+            border-radius: 26px;
+            padding: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .history-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .history-date {
+            font-size: 14px;
+            color: var(--text-soft);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
             font-size: 12px;
             font-weight: 600;
         }
 
-        .bottom-nav a.active {
-            color: #16a34a;
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mini-box {
+            background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .mini-label {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .mini-value {
+            margin-top: 6px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--green-dark);
+            line-height: 1.1;
+        }
+
+        .empty-card {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(220, 252, 231, 0.95);
+            box-shadow: var(--card-shadow);
+            border-radius: 26px;
+            padding: 28px 18px;
+            text-align: center;
+            color: var(--text-soft);
+        }
+
+        .floating-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            width: min(470px, calc(100% - 20px));
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(220, 252, 231, 0.95);
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+            border-radius: 28px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+
+        .floating-nav a {
+            text-decoration: none;
+            color: var(--green-dark);
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 18px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .floating-nav a.active {
+            background: linear-gradient(135deg, #14532d, #22c55e);
+            color: white;
+            box-shadow: 0 10px 20px rgba(22, 163, 74, 0.25);
+        }
+
+        @media (max-width:480px) {
+            .hero h1 {
+                font-size: 27px;
+            }
+
+            .history-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mini-value {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🕘</div>
-            <h1>History</h1>
-            <div class="subtitle">ประวัติการสแกนล่าสุดของระบบ</div>
+    <div class="app">
+        <div class="hero">
+            <div class="hero-top">
+                <div class="hero-left">
+                    <div class="hero-icon">🕘</div>
+                    <div>
+                        <h1>History</h1>
+                        <p>ผลการสแกนย้อนหลังของระบบวิเคราะห์หน้าวัว</p>
+                    </div>
+                </div>
+
+                <div class="hero-badge">
+                    <div class="small">Records</div>
+                    <div class="big" id="historyCount">0</div>
+                </div>
+            </div>
         </div>
 
-        <div id="historyList"></div>
+        <div class="section">
+            <div class="section-title">
+                <h2>ประวัติการสแกน</h2>
+                <span>ล่าสุดก่อน</span>
+            </div>
+
+            <div id="historyList" class="history-list"></div>
+        </div>
     </div>
 
-    <div class="bottom-nav">
+    <div class="floating-nav">
         <a href="dashboard.html">🏠<br>Home</a>
         <a href="index.html">📷<br>Scan</a>
         <a href="history.html" class="active">🕘<br>History</a>
@@ -161,16 +324,35 @@
     <script>
         const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
         const historyList = document.getElementById("historyList");
+        document.getElementById("historyCount").textContent = history.length;
 
         if (history.length === 0) {
-            historyList.innerHTML = '<div class="empty">ยังไม่มีประวัติการสแกน</div>';
+            historyList.innerHTML = `
+                <div class="empty-card">
+                    ยังไม่มีประวัติการสแกน<br>
+                    เริ่มสแกนจากหน้า Scan เพื่อให้ระบบบันทึกข้อมูล
+                </div>
+            `;
         } else {
             historyList.innerHTML = history.map(item => `
-                <div class="item">
-                    <div><strong>วันที่:</strong> ${item.date || "-"}</div>
-                    <div><strong>สถานะ:</strong> ${item.status || "-"}</div>
-                    <div><strong>Confidence:</strong> ${item.confidence || "-"}</div>
-                    <div><strong>Beauty Score:</strong> ${item.beautyScore || "-"}</div>
+                <div class="history-card">
+                    <div class="history-head">
+                        <div class="history-date">📅 ${item.date || "-"}</div>
+                        <div class="status-pill ${item.status === "ตรวจพบหน้าวัว" ? "status-success" : "status-fail"}">
+                            ${item.status === "ตรวจพบหน้าวัว" ? "✅" : "❌"} ${item.status || "-"}
+                        </div>
+                    </div>
+
+                    <div class="history-grid">
+                        <div class="mini-box">
+                            <div class="mini-label">Confidence</div>
+                            <div class="mini-value">${item.confidence || "-"}</div>
+                        </div>
+                        <div class="mini-box">
+                            <div class="mini-label">Beauty Score</div>
+                            <div class="mini-value">${item.beautyScore || "-"}</div>
+                        </div>
+                    </div>
                 </div>
             `).join("");
         }
