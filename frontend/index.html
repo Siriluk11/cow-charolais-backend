@@ -19,13 +19,10 @@
             --green-dark: #14532d;
             --green-main: #16a34a;
             --green-light: #22c55e;
-            --green-soft: #dcfce7;
-            --green-bg: #f0fdf4;
             --text-main: #1f2937;
             --text-soft: #6b7280;
             --warning-bg: #fef3c7;
             --warning-text: #92400e;
-            --danger: #ef4444;
             --shadow-main: 0 16px 40px rgba(20, 83, 45, 0.12);
             --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
             --radius-xl: 28px;
@@ -95,7 +92,6 @@
             margin: 0;
             font-size: 15px;
             color: #4b5563;
-            font-weight: 400;
         }
 
         .camera-wrapper {
@@ -225,7 +221,6 @@
             padding: 8px 14px;
             border-radius: 999px;
             border: 1px solid #d1fae5;
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.08);
         }
 
         .controls {
@@ -247,13 +242,8 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
             font-family: 'Prompt', sans-serif;
             min-width: 136px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
         }
 
         .btn-primary {
@@ -284,7 +274,6 @@
             background: rgba(236, 253, 245, 0.96);
             color: var(--green-dark);
             font-weight: 700;
-            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.12);
             border: 1px solid #bbf7d0;
         }
 
@@ -313,7 +302,6 @@
             box-shadow: var(--shadow-soft);
             text-align: left;
             border: 1px solid #dcfce7;
-            backdrop-filter: blur(4px);
         }
 
         .card-title {
@@ -406,7 +394,6 @@
             margin-top: 14px;
             border: 1px solid #d1fae5;
             display: none;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
         }
 
         .small-note {
@@ -593,7 +580,8 @@
     </div>
 
     <script>
-        const API_URL = "https://cow-charolais-backend.onrender.com/predict";
+        const API_BASE = "https://cow-charolais-backend.onrender.com";
+        const API_URL = `${API_BASE}/predict`;
 
         const video = document.getElementById("video");
         const overlayCanvas = document.getElementById("overlayCanvas");
@@ -612,6 +600,21 @@
         const historyList = document.getElementById("historyList");
 
         let stream = null;
+
+        async function loadProfileSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/profile`);
+                return await response.json();
+            } catch (error) {
+                console.error("โหลด profile settings ไม่สำเร็จ", error);
+                return {
+                    showAnimation: true,
+                    saveHistory: true,
+                    soundAlert: false,
+                    appLanguage: "th"
+                };
+            }
+        }
 
         function resizeOverlayCanvas() {
             overlayCanvas.width = video.videoWidth || video.clientWidth;
@@ -726,37 +729,31 @@
             setStatus("ไม่พบหน้าวัว", "error");
         }
 
-        function saveHistory(item) {
-            const allowSaveHistory = JSON.parse(localStorage.getItem("saveHistory") ?? "true");
-            if (!allowSaveHistory) return;
+        async function loadHistoryFromServer() {
+            try {
+                const response = await fetch(`${API_BASE}/history`);
+                const history = await response.json();
 
-            const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
-            history.unshift(item);
-            const latest10 = history.slice(0, 10);
-            localStorage.setItem("scanHistory", JSON.stringify(latest10));
-            renderHistory();
-        }
+                if (!history.length) {
+                    historyList.innerHTML = `<div class="history-item">ยังไม่มีประวัติการสแกน</div>`;
+                    return;
+                }
 
-        function renderHistory() {
-            const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
-
-            if (history.length === 0) {
-                historyList.innerHTML = `<div class="history-item">ยังไม่มีประวัติการสแกน</div>`;
-                return;
+                historyList.innerHTML = history.slice(0, 10).map(item => `
+                    <div class="history-item">
+                        <div><strong>วันที่:</strong> ${item.date}</div>
+                        <div><strong>สถานะ:</strong> ${item.status}</div>
+                        <div><strong>Confidence:</strong> ${item.confidence}</div>
+                        <div><strong>Beauty Score:</strong> ${item.beautyScore}</div>
+                    </div>
+                `).join("");
+            } catch (error) {
+                console.error("โหลด history ไม่สำเร็จ", error);
+                historyList.innerHTML = `<div class="history-item">โหลดประวัติไม่สำเร็จ</div>`;
             }
-
-            historyList.innerHTML = history.map(item => `
-                <div class="history-item">
-                    <div><strong>วันที่:</strong> ${item.date}</div>
-                    <div><strong>สถานะ:</strong> ${item.status}</div>
-                    <div><strong>Confidence:</strong> ${item.confidence}</div>
-                    <div><strong>Beauty Score:</strong> ${item.beautyScore}</div>
-                </div>
-            `).join("");
         }
 
-        function playSuccessSound() {
-            const soundEnabled = JSON.parse(localStorage.getItem("soundAlert") ?? "false");
+        function playSuccessSound(soundEnabled) {
             if (!soundEnabled) return;
 
             const audio = new Audio("data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTAAAAAA////AAAA////AAAA////AAAA////AAAA////AAAA");
@@ -787,6 +784,8 @@
             clearOverlay();
 
             try {
+                const profileSettings = await loadProfileSettings();
+
                 const response = await fetch(API_URL, {
                     method: "POST",
                     body: formData
@@ -803,20 +802,11 @@
 
                 if (data.predictions && data.predictions.length > 0) {
                     pred = data.predictions[0];
-                } else if (data.detections && data.detections.length > 0) {
-                    pred = data.detections[0];
-                } else if (data.prediction) {
-                    pred = data.prediction;
                 }
 
                 if (!pred) {
                     updateNoFaceResult(imageDataUrl);
-                    saveHistory({
-                        date: new Date().toLocaleString("th-TH"),
-                        status: "ไม่พบหน้าวัว",
-                        confidence: "-",
-                        beautyScore: "-"
-                    });
+                    await loadHistoryFromServer();
                     return;
                 }
 
@@ -824,12 +814,7 @@
 
                 if (confidence < 0.50) {
                     updateNoFaceResult(imageDataUrl);
-                    saveHistory({
-                        date: new Date().toLocaleString("th-TH"),
-                        status: "ไม่พบหน้าวัว",
-                        confidence: `${(confidence * 100).toFixed(1)}%`,
-                        beautyScore: "-"
-                    });
+                    await loadHistoryFromServer();
                     return;
                 }
 
@@ -840,17 +825,11 @@
                     height: pred.height || 0
                 };
 
-                const beautyScore = calculateBeautyScore(confidence, bbox);
+                const beautyScore = data.beauty_score ?? calculateBeautyScore(confidence, bbox);
 
                 updateResult(imageDataUrl, bbox, confidence, beautyScore);
-                playSuccessSound();
-
-                saveHistory({
-                    date: new Date().toLocaleString("th-TH"),
-                    status: "ตรวจพบหน้าวัว",
-                    confidence: `${(confidence * 100).toFixed(1)}%`,
-                    beautyScore: `${beautyScore}/10`
-                });
+                playSuccessSound(profileSettings.soundAlert);
+                await loadHistoryFromServer();
 
             } catch (error) {
                 console.error(error);
@@ -864,15 +843,21 @@
             }
         }
 
-        function clearHistory() {
-            localStorage.removeItem("scanHistory");
-            renderHistory();
+        async function clearHistory() {
+            try {
+                await fetch(`${API_BASE}/history`, { method: "DELETE" });
+                loadHistoryFromServer();
+            } catch (error) {
+                console.error("ล้าง history ไม่สำเร็จ", error);
+            }
         }
 
-        const showAnimation = JSON.parse(localStorage.getItem("showAnimation") ?? "true");
-        if (!showAnimation) {
-            const scanLine = document.querySelector(".scan-line");
-            if (scanLine) scanLine.style.display = "none";
+        async function applyProfileSettingsToUI() {
+            const settings = await loadProfileSettings();
+            if (!settings.showAnimation) {
+                const scanLine = document.querySelector(".scan-line");
+                if (scanLine) scanLine.style.display = "none";
+            }
         }
 
         window.addEventListener("resize", resizeOverlayCanvas);
@@ -880,7 +865,8 @@
         captureBtn.addEventListener("click", captureAndAnalyze);
         clearHistoryBtn.addEventListener("click", clearHistory);
 
-        renderHistory();
+        applyProfileSettingsToUI();
+        loadHistoryFromServer();
     </script>
 </body>
 

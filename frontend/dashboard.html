@@ -19,11 +19,8 @@
             --green-dark: #0f5132;
             --green-main: #16a34a;
             --green-light: #22c55e;
-            --green-soft: #dcfce7;
-            --green-bg: #f3fbf5;
             --text-main: #1f2937;
             --text-soft: #6b7280;
-            --white: #ffffff;
             --card-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
             --soft-shadow: 0 10px 24px rgba(20, 83, 45, 0.10);
         }
@@ -444,22 +441,34 @@
     </div>
 
     <script>
-        const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
-        const total = history.length;
-        const success = history.filter(x => x.status === "ตรวจพบหน้าวัว").length;
+        const API_BASE = "https://cow-charolais-backend.onrender.com";
 
-        const scores = history
-            .map(x => parseFloat(String(x.beautyScore).replace("/10", "")))
-            .filter(x => !isNaN(x));
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE}/history`);
+                const history = await response.json();
 
-        const avg = scores.length
-            ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
-            : "-";
+                const total = history.length;
+                const success = history.filter(x => x.status === "ตรวจพบหน้าวัว").length;
 
-        document.getElementById("totalScans").textContent = total;
-        document.getElementById("successScans").textContent = success;
-        document.getElementById("avgScore").textContent = avg === "-" ? "-" : avg + "/10";
-        document.getElementById("lastStatus").textContent = history[0]?.status || "-";
+                const scores = history
+                    .map(x => parseFloat(String(x.beautyScore).replace("/10", "")))
+                    .filter(x => !isNaN(x));
+
+                const avg = scores.length
+                    ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
+                    : "-";
+
+                document.getElementById("totalScans").textContent = total;
+                document.getElementById("successScans").textContent = success;
+                document.getElementById("avgScore").textContent = avg === "-" ? "-" : avg + "/10";
+                document.getElementById("lastStatus").textContent = history[0]?.status || "-";
+            } catch (error) {
+                console.error("โหลด dashboard ไม่สำเร็จ", error);
+            }
+        }
+
+        loadDashboard();
     </script>
 </body>
 

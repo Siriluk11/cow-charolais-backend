@@ -394,7 +394,7 @@
             </div>
 
             <button class="danger-btn" onclick="clearAllData()">ล้างข้อมูลทั้งหมด</button>
-            <div class="note">การล้างข้อมูลจะลบประวัติการสแกน ข้อมูลโปรไฟล์ และรูปโปรไฟล์ในเบราว์เซอร์นี้</div>
+            <div class="note">การล้างข้อมูลจะลบประวัติการสแกน ข้อมูลโปรไฟล์ และรูปโปรไฟล์ในระบบ</div>
         </div>
     </div>
 
@@ -406,51 +406,64 @@
     </div>
 
     <script>
+        const API_BASE = "https://cow-charolais-backend.onrender.com";
+
         const profilePreview = document.getElementById("profilePreview");
         const profileFallback = document.getElementById("profileFallback");
         const profileImageInput = document.getElementById("profileImageInput");
 
-        function loadProfile() {
-            document.getElementById("userName").value = localStorage.getItem("userName") || "";
-            document.getElementById("farmName").value = localStorage.getItem("farmName") || "";
-            document.getElementById("userCode").value = localStorage.getItem("userCode") || "";
-            document.getElementById("userEmail").value = localStorage.getItem("userEmail") || "";
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_BASE}/profile`);
+                const data = await response.json();
 
-            document.getElementById("showAnimation").checked =
-                JSON.parse(localStorage.getItem("showAnimation") ?? "true");
+                document.getElementById("userName").value = data.userName || "";
+                document.getElementById("farmName").value = data.farmName || "";
+                document.getElementById("userCode").value = data.userCode || "";
+                document.getElementById("userEmail").value = data.userEmail || "";
 
-            document.getElementById("saveHistory").checked =
-                JSON.parse(localStorage.getItem("saveHistory") ?? "true");
+                document.getElementById("showAnimation").checked = !!data.showAnimation;
+                document.getElementById("saveHistory").checked = !!data.saveHistory;
+                document.getElementById("soundAlert").checked = !!data.soundAlert;
+                document.getElementById("appLanguage").value = data.appLanguage || "th";
 
-            document.getElementById("soundAlert").checked =
-                JSON.parse(localStorage.getItem("soundAlert") ?? "false");
-
-            document.getElementById("appLanguage").value =
-                localStorage.getItem("appLanguage") || "th";
-
-            const savedImage = localStorage.getItem("profileImage");
-            if (savedImage) {
-                profilePreview.src = savedImage;
-                profilePreview.style.display = "block";
-                profileFallback.style.display = "none";
-            } else {
-                profilePreview.style.display = "none";
-                profileFallback.style.display = "flex";
+                if (data.profileImage) {
+                    profilePreview.src = data.profileImage;
+                    profilePreview.style.display = "block";
+                    profileFallback.style.display = "none";
+                } else {
+                    profilePreview.style.display = "none";
+                    profileFallback.style.display = "flex";
+                }
+            } catch (error) {
+                console.error("โหลด profile ไม่สำเร็จ", error);
             }
         }
 
-        function saveProfile() {
-            localStorage.setItem("userName", document.getElementById("userName").value);
-            localStorage.setItem("farmName", document.getElementById("farmName").value);
-            localStorage.setItem("userCode", document.getElementById("userCode").value);
-            localStorage.setItem("userEmail", document.getElementById("userEmail").value);
+        async function saveProfile() {
+            const payload = {
+                userName: document.getElementById("userName").value,
+                farmName: document.getElementById("farmName").value,
+                userCode: document.getElementById("userCode").value,
+                userEmail: document.getElementById("userEmail").value,
+                profileImage: profilePreview.src && profilePreview.style.display !== "none" ? profilePreview.src : "",
+                showAnimation: document.getElementById("showAnimation").checked,
+                saveHistory: document.getElementById("saveHistory").checked,
+                soundAlert: document.getElementById("soundAlert").checked,
+                appLanguage: document.getElementById("appLanguage").value
+            };
 
-            localStorage.setItem("showAnimation", document.getElementById("showAnimation").checked);
-            localStorage.setItem("saveHistory", document.getElementById("saveHistory").checked);
-            localStorage.setItem("soundAlert", document.getElementById("soundAlert").checked);
-            localStorage.setItem("appLanguage", document.getElementById("appLanguage").value);
-
-            alert("บันทึกโปรไฟล์และการตั้งค่าเรียบร้อยแล้ว");
+            try {
+                await fetch(`${API_BASE}/profile`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                alert("บันทึกโปรไฟล์และการตั้งค่าเรียบร้อยแล้ว");
+            } catch (error) {
+                console.error("บันทึก profile ไม่สำเร็จ", error);
+                alert("บันทึกไม่สำเร็จ");
+            }
         }
 
         profileImageInput.addEventListener("change", function (event) {
@@ -465,7 +478,6 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 const imageData = e.target.result;
-                localStorage.setItem("profileImage", imageData);
                 profilePreview.src = imageData;
                 profilePreview.style.display = "block";
                 profileFallback.style.display = "none";
@@ -474,37 +486,41 @@
         });
 
         function removeProfileImage() {
-            localStorage.removeItem("profileImage");
             profilePreview.removeAttribute("src");
             profilePreview.style.display = "none";
             profileFallback.style.display = "flex";
             profileImageInput.value = "";
-            alert("ลบรูปโปรไฟล์เรียบร้อยแล้ว");
+            saveProfile();
         }
 
-        document.getElementById("showAnimation").addEventListener("change", e => {
-            localStorage.setItem("showAnimation", e.target.checked);
-        });
-
-        document.getElementById("saveHistory").addEventListener("change", e => {
-            localStorage.setItem("saveHistory", e.target.checked);
-        });
-
-        document.getElementById("soundAlert").addEventListener("change", e => {
-            localStorage.setItem("soundAlert", e.target.checked);
-        });
-
-        document.getElementById("appLanguage").addEventListener("change", e => {
-            localStorage.setItem("appLanguage", e.target.value);
-        });
-
-        function clearAllData() {
+        async function clearAllData() {
             const confirmClear = confirm("ต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?");
             if (!confirmClear) return;
 
-            localStorage.clear();
-            alert("ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว");
-            location.reload();
+            try {
+                await fetch(`${API_BASE}/history`, { method: "DELETE" });
+
+                await fetch(`${API_BASE}/profile`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userName: "",
+                        farmName: "",
+                        userCode: "",
+                        userEmail: "",
+                        profileImage: "",
+                        showAnimation: true,
+                        saveHistory: true,
+                        soundAlert: false,
+                        appLanguage: "th"
+                    })
+                });
+
+                alert("ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว");
+                loadProfile();
+            } catch (error) {
+                console.error("ล้างข้อมูลไม่สำเร็จ", error);
+            }
         }
 
         loadProfile();

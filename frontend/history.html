@@ -22,7 +22,6 @@
             --text-main: #1f2937;
             --text-soft: #6b7280;
             --card-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-            --soft-shadow: 0 10px 24px rgba(20, 83, 45, 0.10);
         }
 
         html,
@@ -322,40 +321,53 @@
     </div>
 
     <script>
-        const history = JSON.parse(localStorage.getItem("scanHistory")) || [];
-        const historyList = document.getElementById("historyList");
-        document.getElementById("historyCount").textContent = history.length;
+        const API_BASE = "https://cow-charolais-backend.onrender.com";
 
-        if (history.length === 0) {
-            historyList.innerHTML = `
-                <div class="empty-card">
-                    ยังไม่มีประวัติการสแกน<br>
-                    เริ่มสแกนจากหน้า Scan เพื่อให้ระบบบันทึกข้อมูล
-                </div>
-            `;
-        } else {
-            historyList.innerHTML = history.map(item => `
-                <div class="history-card">
-                    <div class="history-head">
-                        <div class="history-date">📅 ${item.date || "-"}</div>
-                        <div class="status-pill ${item.status === "ตรวจพบหน้าวัว" ? "status-success" : "status-fail"}">
-                            ${item.status === "ตรวจพบหน้าวัว" ? "✅" : "❌"} ${item.status || "-"}
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_BASE}/history`);
+                const history = await response.json();
+
+                const historyList = document.getElementById("historyList");
+                document.getElementById("historyCount").textContent = history.length;
+
+                if (!history.length) {
+                    historyList.innerHTML = `
+                        <div class="empty-card">
+                            ยังไม่มีประวัติการสแกน<br>
+                            เริ่มสแกนจากหน้า Scan เพื่อให้ระบบบันทึกข้อมูล
+                        </div>
+                    `;
+                    return;
+                }
+
+                historyList.innerHTML = history.map(item => `
+                    <div class="history-card">
+                        <div class="history-head">
+                            <div class="history-date">📅 ${item.date || "-"}</div>
+                            <div class="status-pill ${item.status === "ตรวจพบหน้าวัว" ? "status-success" : "status-fail"}">
+                                ${item.status === "ตรวจพบหน้าวัว" ? "✅" : "❌"} ${item.status || "-"}
+                            </div>
+                        </div>
+
+                        <div class="history-grid">
+                            <div class="mini-box">
+                                <div class="mini-label">Confidence</div>
+                                <div class="mini-value">${item.confidence || "-"}</div>
+                            </div>
+                            <div class="mini-box">
+                                <div class="mini-label">Beauty Score</div>
+                                <div class="mini-value">${item.beautyScore || "-"}</div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="history-grid">
-                        <div class="mini-box">
-                            <div class="mini-label">Confidence</div>
-                            <div class="mini-value">${item.confidence || "-"}</div>
-                        </div>
-                        <div class="mini-box">
-                            <div class="mini-label">Beauty Score</div>
-                            <div class="mini-value">${item.beautyScore || "-"}</div>
-                        </div>
-                    </div>
-                </div>
-            `).join("");
+                `).join("");
+            } catch (error) {
+                console.error("โหลด history ไม่สำเร็จ", error);
+            }
         }
+
+        loadHistory();
     </script>
 </body>
 
