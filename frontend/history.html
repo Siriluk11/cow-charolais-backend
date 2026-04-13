@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>History - Charolais AI Scan</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-1: #f4fff8;
+            --bg-2: #edf7ff;
+            --surface: rgba(255, 255, 255, .84);
+            --surface-strong: #fff;
+            --border: rgba(255, 255, 255, .75);
+            --text: #10231b;
+            --muted: #6d7d75;
+            --primary: #14b86a;
+            --primary-2: #22d584;
+            --primary-dark: #0b7a47;
+            --danger: #ff4d67;
+            --shadow: 0 20px 50px rgba(16, 35, 27, .10);
+            --soft-shadow: 0 12px 28px rgba(20, 184, 106, .16);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100dvh;
+            font-family: 'Sora', 'Noto Sans Thai', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(20, 184, 106, .16), transparent 26%),
+                radial-gradient(circle at top right, rgba(79, 124, 255, .12), transparent 22%),
+                linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        }
+
+        .app {
+            max-width: 520px;
+            margin: 0 auto;
+            min-height: 100dvh;
+            padding: 18px 16px 128px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 34px;
+            padding: 22px;
+            color: #fff;
+            background:
+                linear-gradient(135deg, rgba(13, 132, 77, .98) 0%, rgba(20, 184, 106, .96) 48%, rgba(69, 214, 145, .95) 100%);
+            box-shadow: 0 24px 60px rgba(20, 184, 106, .28);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -90px;
+            top: -80px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .10);
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 31px;
+            line-height: 1.04;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            max-width: 250px;
+            font-size: 13px;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+            font-family: 'Noto Sans Thai', 'Sora', sans-serif;
+        }
+
+        .record-badge {
+            position: relative;
+            z-index: 1;
+            min-width: 100px;
+            padding: 13px 14px;
+            border-radius: 22px;
+            text-align: center;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .22);
+            backdrop-filter: blur(10px);
+            font-weight: 800;
+        }
+
+        .record-badge .small {
+            font-size: 11px;
+            opacity: .88;
+        }
+
+        .record-badge .big {
+            font-size: 30px;
+            margin-top: 4px;
+        }
+
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: -.02em;
+        }
+
+        .section-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 14px;
+            font-family: 'Noto Sans Thai', 'Sora', sans-serif;
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 20px;
+            padding: 15px 14px;
+            font-size: 15px;
+            font-weight: 800;
+            font-family: 'Sora', 'Noto Sans Thai', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--soft-shadow);
+            transition: .18s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-green {
+            color: #fff;
+            background: linear-gradient(135deg, #0f8f56, #25d683);
+        }
+
+        .btn-red {
+            color: #fff;
+            background: linear-gradient(135deg, #ff536b, #ff6f52);
+            box-shadow: 0 12px 26px rgba(255, 83, 107, .22);
+        }
+
+        #historyList {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .history-item {
+            border-radius: 24px;
+            padding: 14px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .98) 0%, rgba(244, 255, 248, .95) 100%);
+            border: 1px solid rgba(20, 184, 106, .10);
+            box-shadow: 0 12px 26px rgba(16, 145, 87, .07);
+        }
+
+        .history-row {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .history-thumb {
+            width: 92px;
+            height: 92px;
+            border-radius: 20px;
+            object-fit: cover;
+            background: #f1f6f3;
+            flex-shrink: 0;
+            border: 1px solid rgba(20, 184, 106, .10);
+        }
+
+        .history-thumb.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #7aa88f;
+        }
+
+        .history-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-content h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+            color: var(--primary-dark);
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .history-content p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.75;
+            color: #486055;
+            word-break: break-word;
+            font-family: 'Noto Sans Thai', 'Sora', sans-serif;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 28px 20px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, #fff8fa 0%, #fff 100%);
+            border: 1px solid #ffd8df;
+            color: #c2354b;
+            font-weight: 800;
+            font-family: 'Noto Sans Thai', 'Sora', sans-serif;
+        }
+
+        .floating-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            width: min(490px, calc(100% - 18px));
+            background: rgba(255, 255, 255, .76);
+            border: 1px solid rgba(255, 255, 255, .75);
+            border-radius: 30px;
+            box-shadow: 0 18px 45px rgba(18, 37, 27, .14);
+            backdrop-filter: blur(20px);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+            z-index: 999;
+        }
+
+        .floating-nav a {
+            text-decoration: none;
+            color: #21503b;
+            text-align: center;
+            padding: 10px 4px;
+            border-radius: 22px;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .floating-nav a.active {
+            color: #fff;
+            background: linear-gradient(135deg, #0f8f56, #25d683);
+            box-shadow: 0 12px 28px rgba(20, 184, 106, .28);
+        }
+
+        .nav-ico {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <section class="hero">
+            <div>
+                <h1>History</h1>
+                <p>ผลการสแกนย้อนหลังของระบบวิเคราะห์ใบหน้าวัวในสไตล์แอปที่อ่านง่ายและดูทันสมัย</p>
+            </div>
+            <div class="record-badge">
+                <div class="small">Records</div>
+                <div class="big" id="recordCount">0</div>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <div class="section-title">ประวัติการสแกน</div>
+            <div class="section-sub">ล่าสุดก่อน</div>
+
+            <div class="button-row">
+                <a href="index.html" class="btn btn-green">ไปหน้า Scan</a>
+                <button id="clearHistoryBtn" class="btn btn-red" type="button">ล้างประวัติทั้งหมด</button>
+            </div>
+
+            <div id="historyList"></div>
+        </section>
+    </div>
+
+    <nav class="floating-nav">
+        <a href="index.html">
+            <span class="nav-ico">📷</span>Scan
+        </a>
+        <a href="history.html" class="active">
+            <span class="nav-ico">🕘</span>History
+        </a>
+        <a href="profile.html">
+            <span class="nav-ico">👤</span>Profile
+        </a>
+    </nav>
+
+    <script>
+        const LOCAL_HISTORY_KEY = "cow_scan_history";
+
+        function hasFunction(name) {
+            return typeof window[name] === "function";
+        }
+
+        function getHistorySafe() {
+            try {
+                const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                console.error("โหลดประวัติไม่สำเร็จ:", error);
+                return [];
+            }
+        }
+
+        async function loadHistoryData() {
+            if (hasFunction("getScanHistoryFromDB")) {
+                try {
+                    const dbData = await window.getScanHistoryFromDB(50);
+                    if (Array.isArray(dbData) && dbData.length) {
+                        return dbData.map(item => ({
+                            image: item.image_url || "",
+                            predictedClass: item.class_name || (item.score ? `คลาส ${item.score}` : "-"),
+                            star: item.score || 0,
+                            confidence: Number(item.confidence || 0).toFixed(2) + "%",
+                            createdAt: item.created_at ? new Date(item.created_at).toLocaleString("th-TH") : "-"
+                        }));
+                    }
+                } catch (error) {
+                    console.error("โหลดประวัติจาก DB ไม่สำเร็จ:", error);
+                }
+            }
+
+            return getHistorySafe();
+        }
+
+        async function renderHistory() {
+            const historyList = document.getElementById("historyList");
+            const recordCount = document.getElementById("recordCount");
+            const history = await loadHistoryData();
+
+            recordCount.textContent = history.length;
+
+            if (!history.length) {
+                historyList.innerHTML = `
+          <div class="empty-state">
+            ยังไม่มีประวัติการวิเคราะห์
+          </div>
+        `;
+                return;
+            }
+
+            historyList.innerHTML = history.map(item => `
+        <div class="history-item">
+          <div class="history-row">
+            ${item.image
+                    ? `<img class="history-thumb" src="${item.image}" alt="history image">`
+                    : `<div class="history-thumb empty">🐄</div>`
+                }
+            <div class="history-content">
+              <h3>${item.predictedClass || "-"}</h3>
+              <p><strong>ระดับดาว:</strong> ${item.star ? item.star + " ดาว" : "-"}</p>
+              <p><strong>ความมั่นใจ:</strong> ${item.confidence || "-"}</p>
+              <p><strong>เวลา:</strong> ${item.createdAt || "-"}</p>
+            </div>
+          </div>
+        </div>
+      `).join("");
+        }
+
+        function clearAllHistory() {
+            const ok = confirm("ต้องการลบประวัติทั้งหมดใช่หรือไม่");
+            if (!ok) return;
+
+            localStorage.removeItem(LOCAL_HISTORY_KEY);
+            renderHistory();
+        }
+
+        document.getElementById("clearHistoryBtn").addEventListener("click", clearAllHistory);
+        renderHistory();
+    </script>
+</body>
+
+</html>

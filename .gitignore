@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.keras
+*.h5
+dataset/
+dataset.zip
+outputs/
+.idea/
+.vscode/
+*.db
+*.bin
