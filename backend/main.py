@@ -12,7 +12,7 @@ from tensorflow.keras.applications.mobilenet_v3 import preprocess_input  # type:
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "model.h5")
+MODEL_PATH = "backend/model.h5"
 IMG_SIZE = (224, 224)
 CLASS_NAMES = ["1", "2", "3", "4", "5"]
 
