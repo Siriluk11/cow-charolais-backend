@@ -33,34 +33,34 @@ def load_model_safely(path: str):
     if not os.path.exists(path):
         raise FileNotFoundError(f"Model file not found: {path}")
 
-    print(f"🔄 Loading model from: {path}")
-    print(f"📦 File size: {os.path.getsize(path) / (1024 * 1024):.2f} MB")
+    print(f"Loading model from: {path}")
+    print(f"Model file size: {os.path.getsize(path) / (1024 * 1024):.2f} MB")
 
-    # โหลดตรงก่อน
-    model = tf.keras.models.load_model(path, compile=False)
-    print("✅ Model loaded successfully")
-    return model
+    loaded_model = tf.keras.models.load_model(
+        path,
+        compile=False,
+        safe_mode=False
+    )
+    print("Model loaded successfully")
+    return loaded_model
 
 
 try:
     model = load_model_safely(MODEL_PATH)
 except Exception as e:
     model = None
-    print("❌ โหลดโมเดลไม่สำเร็จ")
-    print(f"Error: {e}")
+    print("Load model failed")
+    print(f"Exact error: {repr(e)}")
     traceback.print_exc()
 
 
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
-    try:
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        image = image.resize(IMG_SIZE)
-        arr = np.array(image, dtype=np.float32)
-        arr = preprocess_input(arr)
-        arr = np.expand_dims(arr, axis=0)
-        return arr
-    except Exception as e:
-        raise ValueError(f"Image preprocessing failed: {str(e)}")
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    image = image.resize(IMG_SIZE)
+    arr = np.array(image, dtype=np.float32)
+    arr = preprocess_input(arr)
+    arr = np.expand_dims(arr, axis=0)
+    return arr
 
 
 @app.get("/")
