@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 import numpy as np
 import tensorflow as tf
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from tensorflow.keras.applications.mobilenet_v3 import preprocess_input  # type: ignore
@@ -29,19 +29,28 @@ app.add_middleware(
 model = None
 
 
+def log(*args):
+    print(*args, flush=True)
+
+
 def load_model_safely(path: str):
+    log("🚀 START LOADING MODEL...")
+    log(f"📂 MODEL PATH: {path}")
+
     if not os.path.exists(path):
         raise FileNotFoundError(f"Model file not found: {path}")
 
-    print(f"Loading model from: {path}")
-    print(f"Model file size: {os.path.getsize(path) / (1024 * 1024):.2f} MB")
+    file_size_mb = os.path.getsize(path) / (1024 * 1024)
+    log(f"📏 FILE EXISTS: True")
+    log(f"📦 FILE SIZE: {file_size_mb:.2f} MB")
 
     loaded_model = tf.keras.models.load_model(
         path,
         compile=False,
         safe_mode=False
     )
-    print("Model loaded successfully")
+
+    log("✅ Model loaded successfully")
     return loaded_model
 
 
@@ -49,18 +58,23 @@ try:
     model = load_model_safely(MODEL_PATH)
 except Exception as e:
     model = None
-    print("Load model failed")
-    print(f"Exact error: {repr(e)}")
+    log("❌ Load model failed")
+    log(f"❌ Exact error: {repr(e)}")
     traceback.print_exc()
 
 
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    image = image.resize(IMG_SIZE)
-    arr = np.array(image, dtype=np.float32)
-    arr = preprocess_input(arr)
-    arr = np.expand_dims(arr, axis=0)
-    return arr
+    try:
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        image = image.resize(IMG_SIZE)
+        arr = np.array(image, dtype=np.float32)
+        arr = preprocess_input(arr)
+        arr = np.expand_dims(arr, axis=0)
+        return arr
+    except UnidentifiedImageError:
+        raise ValueError("Uploaded file is not a valid image")
+    except Exception as e:
+        raise ValueError(f"Image preprocessing failed: {str(e)}")
 
 
 @app.get("/")
@@ -72,6 +86,7 @@ def root() -> Dict[str, str]:
 def health() -> Dict[str, Any]:
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded")
+
     return {
         "status": "ok",
         "model_loaded": True,
@@ -83,6 +98,9 @@ def health() -> Dict[str, Any]:
 async def predict(file: UploadFile = File(...)) -> Dict[str, Any]:
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded")
+
+    if not file:
+        raise HTTPException(status_code=400, detail="No file uploaded")
 
     contents = await file.read()
     if not contents:
@@ -106,6 +124,11 @@ async def predict(file: UploadFile = File(...)) -> Dict[str, Any]:
                 for i in range(len(CLASS_NAMES))
             }
         }
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        log("❌ Prediction failed")
+        log(f"❌ Prediction error: {repr(e)}")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
