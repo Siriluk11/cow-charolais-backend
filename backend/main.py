@@ -35,7 +35,14 @@ def log(*args):
 
 def load_model_safely(path: str):
     log("🚀 START LOADING MODEL...")
-    log(f"📂 MODEL PATH: {path}")
+    log(f"📁 BASE_DIR: {BASE_DIR}")
+    log(f"📂 MODEL_PATH: {path}")
+
+    try:
+        files_in_base = os.listdir(BASE_DIR)
+        log(f"📄 FILES IN BASE_DIR: {files_in_base}")
+    except Exception as e:
+        log(f"⚠️ Cannot list BASE_DIR files: {repr(e)}")
 
     if not os.path.exists(path):
         raise FileNotFoundError(f"Model file not found: {path}")
@@ -43,12 +50,8 @@ def load_model_safely(path: str):
     file_size_mb = os.path.getsize(path) / (1024 * 1024)
     log("📏 FILE EXISTS: True")
     log(f"📦 FILE SIZE: {file_size_mb:.2f} MB")
-    log(f"📁 FILES IN BASE_DIR: {os.listdir(BASE_DIR)}")
 
-    loaded_model = tf.keras.models.load_model(
-        path,
-        compile=False
-    )
+    loaded_model = tf.keras.models.load_model(path, compile=False)
 
     log("✅ Model loaded successfully")
     return loaded_model
@@ -90,7 +93,9 @@ def health() -> Dict[str, Any]:
     return {
         "status": "ok",
         "model_loaded": True,
-        "model_path": MODEL_PATH
+        "model_path": MODEL_PATH,
+        "img_size": IMG_SIZE,
+        "class_names": CLASS_NAMES
     }
 
 
