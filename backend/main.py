@@ -41,13 +41,13 @@ def load_model_safely(path: str):
         raise FileNotFoundError(f"Model file not found: {path}")
 
     file_size_mb = os.path.getsize(path) / (1024 * 1024)
-    log(f"📏 FILE EXISTS: True")
+    log("📏 FILE EXISTS: True")
     log(f"📦 FILE SIZE: {file_size_mb:.2f} MB")
+    log(f"📁 FILES IN BASE_DIR: {os.listdir(BASE_DIR)}")
 
     loaded_model = tf.keras.models.load_model(
         path,
-        compile=False,
-        safe_mode=False
+        compile=False
     )
 
     log("✅ Model loaded successfully")
