@@ -4,4 +4,5 @@ python-multipart==0.0.9
 pillow==10.4.0
 numpy==1.26.4
 tensorflow==2.16.1
+keras==3.3.3
 h5py==3.11.0
