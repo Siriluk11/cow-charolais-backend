@@ -1,7 +1,4 @@
-const SUPABASE_URL = "https://momddwmijtaszufzrhll.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_3elCSxWZHTYTZAPQyeIx6w_jbjnit8q";
-
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const API_BASE_URL = "https://cow-charolais-backend.onrender.com";
 
 // =========================
 // SCAN RESULTS
@@ -16,44 +13,42 @@ async function saveScanResultToDB({ className, score, confidence, sourceType }) 
             image_url: null
         };
 
-        console.log("📦 saveScanResultToDB payload:", payload);
+        const response = await fetch(`${API_BASE_URL}/save-result`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
 
-        const { data, error } = await sb
-            .from("scan_results")
-            .insert([payload])
-            .select();
-
-        if (error) {
-            console.error("❌ saveScanResultToDB error:", error);
-            alert("บันทึกไม่สำเร็จ: " + error.message);
+        if (!response.ok) {
+            const text = await response.text();
+            alert("บันทึกไม่สำเร็จ: " + text);
             return null;
         }
 
-        console.log("✅ saveScanResultToDB success:", data);
-        return data;
+        return await response.json();
     } catch (err) {
-        console.error("❌ saveScanResultToDB exception:", err);
-        alert("เกิดข้อผิดพลาดระหว่างบันทึกข้อมูล");
+        console.error("saveScanResultToDB:", err);
+        alert("บันทึกไม่สำเร็จ: " + err.message);
         return null;
     }
 }
 
 async function getScanHistoryFromDB(limit = 5) {
     try {
-        const { data, error } = await sb
-            .from("scan_results")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(limit);
+        const response = await fetch(`${API_BASE_URL}/history?limit=${limit}`);
 
-        if (error) {
-            console.error("getScanHistoryFromDB error:", error);
-            throw error;
+        if (!response.ok) {
+            const text = await response.text();
+            alert("โหลดประวัติไม่สำเร็จ: " + text);
+            return [];
         }
 
-        return data || [];
+        return await response.json();
     } catch (err) {
-        console.error("❌ getScanHistoryFromDB exception:", err);
+        console.error("getScanHistoryFromDB:", err);
+        alert("โหลดประวัติไม่สำเร็จ: " + err.message);
         return [];
     }
 }
@@ -63,99 +58,64 @@ async function getScanHistoryFromDB(limit = 5) {
 // =========================
 async function getProfileFromDB() {
     try {
-        const { data, error } = await sb
-            .from("profiles")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-        if (error) {
-            console.error("getProfileFromDB error:", error);
-            throw error;
-        }
-
-        return data || null;
+        const response = await fetch(`${API_BASE_URL}/profile`);
+        if (!response.ok) return null;
+        return await response.json();
     } catch (err) {
-        console.error("❌ getProfileFromDB exception:", err);
+        console.error("getProfileFromDB:", err);
         return null;
     }
 }
 
 async function saveProfileToDB({ username, farmName, avatarUrl }) {
     try {
-        const existing = await getProfileFromDB();
+        const response = await fetch(`${API_BASE_URL}/profile`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username || "",
+                farm_name: farmName || "",
+                avatar_url: avatarUrl || ""
+            })
+        });
 
-        if (existing?.id) {
-            const { data, error } = await sb
-                .from("profiles")
-                .update({
-                    username: username || "",
-                    farm_name: farmName || "",
-                    avatar_url: avatarUrl || ""
-                })
-                .eq("id", existing.id)
-                .select()
-                .single();
-
-            if (error) {
-                console.error("saveProfileToDB update error:", error);
-                throw error;
-            }
-
-            return data;
-        } else {
-            const { data, error } = await sb
-                .from("profiles")
-                .insert([{
-                    username: username || "",
-                    farm_name: farmName || "",
-                    avatar_url: avatarUrl || ""
-                }])
-                .select()
-                .single();
-
-            if (error) {
-                console.error("saveProfileToDB insert error:", error);
-                throw error;
-            }
-
-            return data;
+        if (!response.ok) {
+            const text = await response.text();
+            alert("บันทึกโปรไฟล์ไม่สำเร็จ: " + text);
+            return null;
         }
+
+        return await response.json();
     } catch (err) {
-        console.error("❌ saveProfileToDB exception:", err);
-        alert("บันทึกโปรไฟล์ไม่สำเร็จ");
+        console.error("saveProfileToDB:", err);
+        alert("บันทึกโปรไฟล์ไม่สำเร็จ: " + err.message);
         return null;
     }
 }
 
-// =========================
-// STORAGE
-// =========================
 async function uploadProfileImage(file) {
     try {
-        const ext = file.name.split(".").pop() || "png";
-        const fileName = `profile_${Date.now()}.${ext}`;
+        const formData = new FormData();
+        formData.append("file", file);
 
-        const { error } = await sb.storage
-            .from("profile-images")
-            .upload(fileName, file, {
-                upsert: true
-            });
+        const response = await fetch(`${API_BASE_URL}/upload-profile-image`, {
+            method: "POST",
+            body: formData
+        });
 
-        if (error) {
-            console.error("uploadProfileImage error:", error);
-            throw error;
+        if (!response.ok) {
+            const text = await response.text();
+            alert("อัปโหลดรูปไม่สำเร็จ: " + text);
+            return null;
         }
 
-        const { data } = sb.storage
-            .from("profile-images")
-            .getPublicUrl(fileName);
-
-        return data.publicUrl;
+        const data = await response.json();
+        return data.public_url || data.url || null;
     } catch (err) {
-        console.error("❌ uploadProfileImage exception:", err);
-        alert("อัปโหลดรูปไม่สำเร็จ");
+        console.error("uploadProfileImage:", err);
+        alert("อัปโหลดรูปไม่สำเร็จ: " + err.message);
         return null;
     }
 }

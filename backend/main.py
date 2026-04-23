@@ -1,5 +1,6 @@
 import io
 import os
+import sqlite3
 import traceback
 from typing import Dict, Any, Optional
 
@@ -178,3 +179,90 @@ async def predict(file: UploadFile = File(...)) -> Dict[str, Any]:
         log(f"❌ Prediction error: {repr(e)}")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+    import sqlite3
+
+DB_PATH = os.path.join(BASE_DIR, "app.db")
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS scan_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            class_name TEXT,
+            score INTEGER,
+            confidence REAL,
+            source_type TEXT,
+            image_url TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+
+# =========================
+# SAVE RESULT
+# =========================
+from pydantic import BaseModel
+
+class ScanResult(BaseModel):
+    class_name: str
+    score: int
+    confidence: float
+    source_type: str
+    image_url: Optional[str] = None
+
+
+@app.post("/save-result")
+def save_result(payload: ScanResult):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO scan_results (class_name, score, confidence, source_type, image_url)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            payload.class_name,
+            payload.score,
+            payload.confidence,
+            payload.source_type,
+            payload.image_url
+        ))
+
+        conn.commit()
+        row_id = cur.lastrowid
+        conn.close()
+
+        return {"status": "success", "id": row_id}
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+# =========================
+# GET HISTORY
+# =========================
+@app.get("/history")
+def history(limit: int = 5):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT * FROM scan_results
+            ORDER BY id DESC
+            LIMIT ?
+        """, (limit,))
+
+        rows = [dict(r) for r in cur.fetchall()]
+        conn.close()
+
+        return rows
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
