@@ -1,9 +1,3 @@
-// 🔗 URL ของ Render backend (ของคุณ)
-const API_URL = "https://cow-charolais-backend.onrender.com";
-
-// =========================
-// SCAN RESULTS (SAVE)
-// =========================
 async function saveScanResultToDB({ className, score, confidence, sourceType }) {
     try {
         const payload = {
@@ -24,55 +18,46 @@ async function saveScanResultToDB({ className, score, confidence, sourceType }) 
 
         if (!response.ok) {
             const text = await response.text();
-            console.error("❌ saveScanResultToDB:", text);
+            console.error("saveScanResultToDB error:", text);
             return null;
         }
 
-        const data = await response.json();
-        console.log("✅ saved:", data);
-        return data;
-
+        return await response.json();
     } catch (err) {
-        console.error("❌ saveScanResultToDB error:", err);
+        console.error("saveScanResultToDB error:", err);
         return null;
     }
 }
 
-
-// =========================
-// HISTORY
-// =========================
 async function getScanHistoryFromDB(limit = 5) {
     try {
         const response = await fetch(`${API_URL}/history?limit=${limit}`);
 
         if (!response.ok) {
             const text = await response.text();
-            console.error("❌ history error:", text);
+            console.error("getScanHistoryFromDB error:", text);
             return [];
         }
 
         const data = await response.json();
-        console.log("✅ history:", data);
         return Array.isArray(data) ? data : [];
-
     } catch (err) {
-        console.error("❌ history fetch error:", err);
+        console.error("getScanHistoryFromDB error:", err);
         return [];
     }
 }
 
-
-// =========================
-// PROFILE (ถ้ามีใช้)
-// =========================
 async function getProfileFromDB() {
     try {
         const response = await fetch(`${API_URL}/profile`);
-        if (!response.ok) return null;
+
+        if (!response.ok) {
+            return null;
+        }
+
         return await response.json();
     } catch (err) {
-        console.error("❌ getProfile error:", err);
+        console.error("getProfileFromDB error:", err);
         return null;
     }
 }
@@ -93,22 +78,17 @@ async function saveProfileToDB({ username, farmName, avatarUrl }) {
 
         if (!response.ok) {
             const text = await response.text();
-            console.error("❌ saveProfile error:", text);
+            console.error("saveProfileToDB error:", text);
             return null;
         }
 
         return await response.json();
-
     } catch (err) {
-        console.error("❌ saveProfile error:", err);
+        console.error("saveProfileToDB error:", err);
         return null;
     }
 }
 
-
-// =========================
-// STORAGE (ถ้ามีใช้)
-// =========================
 async function uploadProfileImage(file) {
     try {
         const formData = new FormData();
@@ -121,15 +101,14 @@ async function uploadProfileImage(file) {
 
         if (!response.ok) {
             const text = await response.text();
-            console.error("❌ upload image error:", text);
+            console.error("uploadProfileImage error:", text);
             return null;
         }
 
         const data = await response.json();
         return data.public_url || data.url || null;
-
     } catch (err) {
-        console.error("❌ upload image error:", err);
+        console.error("uploadProfileImage error:", err);
         return null;
     }
 }
