@@ -49,23 +49,7 @@ MODEL_SAVE_DIR.mkdir(parents=True, exist_ok=True)
 # =========================
 # เลือกโมเดลทีละตัว
 # =========================
-MODEL_NAME = "MobileNetV3Large"
-
-# ตัวอย่าง
-# MODEL_NAME = "MobileNet"
-# MODEL_NAME = "MobileNetV2"
-# MODEL_NAME = "MobileNetV3Small"
-# MODEL_NAME = "MobileNetV3Large"
-# MODEL_NAME = "NASNetMobile"
-# MODEL_NAME = "EfficientNetB0"
-# MODEL_NAME = "EfficientNetB1"
-# MODEL_NAME = "ResNet50V2"
-# MODEL_NAME = "InceptionV3"
-# MODEL_NAME = "Xception"
-
-# =========================
-# PARAMETER
-# =========================
+MODEL_NAME = "EfficientNetB1"
 KFOLDS = 5
 EPOCHS = 1000                 # เริ่มที่ 400 ก่อน
 LEARNING_RATE = 0.0001        # ถ้ายังไม่ดีค่อยเปลี่ยนเป็น 0.0001
