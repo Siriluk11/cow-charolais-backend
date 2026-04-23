@@ -1,7 +1,8 @@
-const API_BASE_URL = "https://cow-charolais-backend.onrender.com";
+// 🔗 URL ของ Render backend (ของคุณ)
+const API_URL = "https://cow-charolais-backend.onrender.com";
 
 // =========================
-// SCAN RESULTS
+// SCAN RESULTS (SAVE)
 // =========================
 async function saveScanResultToDB({ className, score, confidence, sourceType }) {
     try {
@@ -13,7 +14,7 @@ async function saveScanResultToDB({ className, score, confidence, sourceType }) 
             image_url: null
         };
 
-        const response = await fetch(`${API_BASE_URL}/save-result`, {
+        const response = await fetch(`${API_URL}/save-result`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -23,53 +24,62 @@ async function saveScanResultToDB({ className, score, confidence, sourceType }) 
 
         if (!response.ok) {
             const text = await response.text();
-            alert("บันทึกไม่สำเร็จ: " + text);
+            console.error("❌ saveScanResultToDB:", text);
             return null;
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log("✅ saved:", data);
+        return data;
+
     } catch (err) {
-        console.error("saveScanResultToDB:", err);
-        alert("บันทึกไม่สำเร็จ: " + err.message);
+        console.error("❌ saveScanResultToDB error:", err);
         return null;
     }
 }
 
+
+// =========================
+// HISTORY
+// =========================
 async function getScanHistoryFromDB(limit = 5) {
     try {
-        const response = await fetch(`${API_BASE_URL}/history?limit=${limit}`);
+        const response = await fetch(`${API_URL}/history?limit=${limit}`);
 
         if (!response.ok) {
             const text = await response.text();
-            alert("โหลดประวัติไม่สำเร็จ: " + text);
+            console.error("❌ history error:", text);
             return [];
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log("✅ history:", data);
+        return Array.isArray(data) ? data : [];
+
     } catch (err) {
-        console.error("getScanHistoryFromDB:", err);
-        alert("โหลดประวัติไม่สำเร็จ: " + err.message);
+        console.error("❌ history fetch error:", err);
         return [];
     }
 }
 
+
 // =========================
-// PROFILE
+// PROFILE (ถ้ามีใช้)
 // =========================
 async function getProfileFromDB() {
     try {
-        const response = await fetch(`${API_BASE_URL}/profile`);
+        const response = await fetch(`${API_URL}/profile`);
         if (!response.ok) return null;
         return await response.json();
     } catch (err) {
-        console.error("getProfileFromDB:", err);
+        console.error("❌ getProfile error:", err);
         return null;
     }
 }
 
 async function saveProfileToDB({ username, farmName, avatarUrl }) {
     try {
-        const response = await fetch(`${API_BASE_URL}/profile`, {
+        const response = await fetch(`${API_URL}/profile`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -83,39 +93,43 @@ async function saveProfileToDB({ username, farmName, avatarUrl }) {
 
         if (!response.ok) {
             const text = await response.text();
-            alert("บันทึกโปรไฟล์ไม่สำเร็จ: " + text);
+            console.error("❌ saveProfile error:", text);
             return null;
         }
 
         return await response.json();
+
     } catch (err) {
-        console.error("saveProfileToDB:", err);
-        alert("บันทึกโปรไฟล์ไม่สำเร็จ: " + err.message);
+        console.error("❌ saveProfile error:", err);
         return null;
     }
 }
 
+
+// =========================
+// STORAGE (ถ้ามีใช้)
+// =========================
 async function uploadProfileImage(file) {
     try {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch(`${API_BASE_URL}/upload-profile-image`, {
+        const response = await fetch(`${API_URL}/upload-profile-image`, {
             method: "POST",
             body: formData
         });
 
         if (!response.ok) {
             const text = await response.text();
-            alert("อัปโหลดรูปไม่สำเร็จ: " + text);
+            console.error("❌ upload image error:", text);
             return null;
         }
 
         const data = await response.json();
         return data.public_url || data.url || null;
+
     } catch (err) {
-        console.error("uploadProfileImage:", err);
-        alert("อัปโหลดรูปไม่สำเร็จ: " + err.message);
+        console.error("❌ upload image error:", err);
         return null;
     }
 }
