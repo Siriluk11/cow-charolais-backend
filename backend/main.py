@@ -9,10 +9,13 @@ import tensorflow as tf
 from PIL import Image, UnidentifiedImageError
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from tensorflow.keras.applications.mobilenet_v3 import preprocess_input  # type: ignore
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "MobileNetV3Large_final_best.keras")
+DB_PATH = os.path.join(BASE_DIR, "app.db")
+
 IMG_SIZE = (224, 224)
 CLASS_NAMES = ["1", "2", "3", "4", "5"]
 
@@ -32,6 +35,27 @@ model_error: Optional[str] = None
 
 def log(*args):
     print(*args, flush=True)
+
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS scan_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            class_name TEXT,
+            score INTEGER,
+            confidence REAL,
+            source_type TEXT,
+            image_url TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+init_db()
 
 
 def try_load_model() -> Optional[tf.keras.Model]:
@@ -88,6 +112,14 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
         raise ValueError(f"Image preprocessing failed: {str(e)}")
 
 
+class ScanResult(BaseModel):
+    class_name: str
+    score: int
+    confidence: float
+    source_type: str
+    image_url: Optional[str] = None
+
+
 @app.get("/")
 def root() -> Dict[str, str]:
     return {"message": "Cow Face API is running"}
@@ -95,20 +127,10 @@ def root() -> Dict[str, str]:
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
-    loaded = try_load_model()
-    if loaded is None:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": "Model not loaded",
-                "model_path": MODEL_PATH,
-                "error": model_error,
-            },
-        )
-
     return {
         "status": "ok",
-        "model_loaded": True,
+        "message": "API is running",
+        "model_loaded": model is not None,
         "model_path": MODEL_PATH,
         "img_size": IMG_SIZE,
         "class_names": CLASS_NAMES,
@@ -179,45 +201,10 @@ async def predict(file: UploadFile = File(...)) -> Dict[str, Any]:
         log(f"❌ Prediction error: {repr(e)}")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
-    import sqlite3
-
-DB_PATH = os.path.join(BASE_DIR, "app.db")
-
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS scan_results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            class_name TEXT,
-            score INTEGER,
-            confidence REAL,
-            source_type TEXT,
-            image_url TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
-
-
-# =========================
-# SAVE RESULT
-# =========================
-from pydantic import BaseModel
-
-class ScanResult(BaseModel):
-    class_name: str
-    score: int
-    confidence: float
-    source_type: str
-    image_url: Optional[str] = None
 
 
 @app.post("/save-result")
-def save_result(payload: ScanResult):
+def save_result(payload: ScanResult) -> Dict[str, Any]:
     try:
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
@@ -240,14 +227,11 @@ def save_result(payload: ScanResult):
         return {"status": "success", "id": row_id}
 
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=500, detail=f"Save failed: {str(e)}")
 
 
-# =========================
-# GET HISTORY
-# =========================
 @app.get("/history")
-def history(limit: int = 5):
+def history(limit: int = 5) -> Any:
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
@@ -265,4 +249,4 @@ def history(limit: int = 5):
         return rows
 
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=500, detail=f"History failed: {str(e)}")
