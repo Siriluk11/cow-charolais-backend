@@ -89,7 +89,8 @@ async function registerUser(username, password) {
     users.push({
         username,
         passwordHash,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     });
 
     saveUsers(users);
@@ -148,6 +149,45 @@ async function loginUser(username, password) {
     };
 }
 
+async function resetPassword(username, newPassword) {
+    username = normalizeUsername(username);
+
+    if (!username) {
+        return {
+            ok: false,
+            message: "กรุณากรอกชื่อผู้ใช้"
+        };
+    }
+
+    if (!isValidPassword(newPassword)) {
+        return {
+            ok: false,
+            message: "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัว และมีตัวอักษรภาษาอังกฤษตัวใหญ่ 1 ตัว"
+        };
+    }
+
+    const users = getUsers();
+    const index = users.findIndex(user => user.username.toLowerCase() === username.toLowerCase());
+
+    if (index === -1) {
+        return {
+            ok: false,
+            message: "ไม่พบบัญชีผู้ใช้นี้"
+        };
+    }
+
+    users[index].passwordHash = await sha256(newPassword);
+    users[index].updatedAt = new Date().toISOString();
+
+    saveUsers(users);
+    localStorage.removeItem(AUTH_SESSION_KEY);
+
+    return {
+        ok: true,
+        message: "เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่"
+    };
+}
+
 function getProfile() {
     const session = getCurrentUser();
     if (!session || !session.username) return null;
@@ -172,10 +212,12 @@ function saveProfile(profile) {
     const session = getCurrentUser();
     if (!session || !session.username) return false;
 
+    const oldProfile = getProfile() || {};
+
     const payload = {
         username: session.username,
         farmName: profile.farmName || "",
-        avatar: profile.avatar || "",
+        avatar: profile.avatar || oldProfile.avatar || "",
         updatedAt: new Date().toISOString()
     };
 

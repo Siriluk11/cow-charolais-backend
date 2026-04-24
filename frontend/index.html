@@ -2,207 +2,26 @@
 <html lang="th">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Charolais AI Scan</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
         rel="stylesheet">
-
+    <link rel="stylesheet" href="./app.css">
     <script src="./auth.js"></script>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #0f6b45;
-            --primary-2: #19a96b;
-            --primary-soft: #e9f8f0;
-            --ink: #10231b;
-            --muted: #65756d;
-            --card: rgba(255, 255, 255, .88);
-            --line: rgba(15, 107, 69, .14);
-            --shadow: 0 24px 70px rgba(16, 35, 27, .16);
-            --danger: #c0394f;
-        }
-
-        html,
-        body {
-            margin: 0;
-            min-height: 100dvh;
-            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
-            color: var(--ink);
-            background:
-                radial-gradient(circle at top left, rgba(25, 169, 107, .20), transparent 30%),
-                radial-gradient(circle at bottom right, rgba(15, 107, 69, .14), transparent 34%),
-                linear-gradient(180deg, #f5fbf7 0%, #eaf4ef 100%);
-        }
-
-        .app {
-            max-width: 480px;
-            min-height: 100dvh;
-            margin: 0 auto;
-            padding: 24px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .auth-card {
-            width: 100%;
-            background: var(--card);
-            border: 1px solid rgba(255, 255, 255, .8);
-            border-radius: 34px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
-            padding: 24px 20px;
-        }
-
-        .brand-icon {
-            width: 82px;
-            height: 82px;
-            border-radius: 26px;
-            margin: 0 auto 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0f6b45, #19a96b);
-            box-shadow: 0 18px 40px rgba(15, 107, 69, .24);
-        }
-
-        .brand-icon svg {
-            width: 42px;
-            height: 42px;
-            color: #fff;
-        }
-
-        h1 {
-            margin: 0;
-            text-align: center;
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: -.03em;
-        }
-
-        .subtitle {
-            margin: 10px 0 22px;
-            text-align: center;
-            font-family: 'Noto Sans Thai', sans-serif;
-            font-size: 14px;
-            line-height: 1.8;
-            color: var(--muted);
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #173b2a;
-        }
-
-        input {
-            width: 100%;
-            border: 1.5px solid var(--line);
-            border-radius: 18px;
-            padding: 15px 16px;
-            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
-            font-size: 15px;
-            outline: none;
-            background: rgba(255, 255, 255, .86);
-        }
-
-        input:focus {
-            border-color: var(--primary-2);
-            box-shadow: 0 0 0 5px rgba(25, 169, 107, .12);
-        }
-
-        .btn {
-            width: 100%;
-            border: none;
-            border-radius: 18px;
-            padding: 15px 18px;
-            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
-            font-size: 15px;
-            font-weight: 800;
-            cursor: pointer;
-        }
-
-        .btn-main {
-            margin-top: 4px;
-            color: #fff;
-            background: linear-gradient(135deg, #0f6b45, #19a96b);
-            box-shadow: 0 14px 30px rgba(15, 107, 69, .22);
-        }
-
-        .link-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 18px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .link-row a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .message {
-            min-height: 22px;
-            margin-top: 14px;
-            text-align: center;
-            font-family: 'Noto Sans Thai', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1.7;
-            color: var(--muted);
-        }
-
-        .message.error {
-            color: var(--danger);
-        }
-
-        .message.success {
-            color: var(--primary);
-        }
-
-        .note {
-            margin-top: 16px;
-            padding: 12px;
-            border-radius: 18px;
-            background: var(--primary-soft);
-            font-family: 'Noto Sans Thai', sans-serif;
-            font-size: 12px;
-            line-height: 1.8;
-            color: #527064;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="app">
+    <div class="auth-page">
         <div class="auth-card">
-            <div class="brand-icon">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M5 10.5C5 6.9 8.1 4 12 4s7 2.9 7 6.5V13c0 3.9-3.1 7-7 7s-7-3.1-7-7v-2.5Z"
-                        stroke="currentColor" stroke-width="2" />
-                    <path d="M8 5 6 2M16 5l2-3M9 12h.01M15 12h.01M9.5 16c1.5 1 3.5 1 5 0" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" />
-                </svg>
+            <div class="brand-mark cow-mark">
+                <span>🐮</span>
             </div>
 
-            <h1>เข้าสู่ระบบ</h1>
+            <h1 style="text-align:center;">เข้าสู่ระบบ</h1>
+
             <div class="subtitle">
                 Charolais AI Scan<br>
                 ระบบวิเคราะห์ความสวยงามใบหน้าโคพันธุ์ชาโรเล่ส์
@@ -218,17 +37,19 @@
                 <input id="password" type="password" placeholder="กรอกรหัสผ่าน">
             </div>
 
-            <button class="btn btn-main" id="loginBtn" type="button">เข้าสู่ระบบ</button>
+            <button class="btn btn-main" id="loginBtn" type="button">
+                เข้าสู่ระบบ
+            </button>
 
             <div class="link-row">
                 <a href="register.html">ลงทะเบียน</a>
-                <a href="#" id="forgotLink">ลืมรหัสผ่าน?</a>
+                <a href="forgot.html">ลืมรหัสผ่าน?</a>
             </div>
 
             <div class="message" id="message"></div>
 
             <div class="note">
-                ระบบนี้บันทึกบัญชีผู้ใช้และโปรไฟล์แยกตามชื่อผู้ใช้ พร้อมเข้ารหัสรหัสผ่านก่อนจัดเก็บในเครื่อง
+                ระบบจะบันทึกบัญชีผู้ใช้และโปรไฟล์แยกตามชื่อผู้ใช้ พร้อมเข้ารหัสรหัสผ่านก่อนจัดเก็บในเครื่อง
             </div>
         </div>
     </div>
@@ -237,7 +58,6 @@
         const usernameInput = document.getElementById("username");
         const passwordInput = document.getElementById("password");
         const loginBtn = document.getElementById("loginBtn");
-        const forgotLink = document.getElementById("forgotLink");
         const message = document.getElementById("message");
 
         function showMessage(text, type = "") {
@@ -259,11 +79,6 @@
             setTimeout(() => {
                 window.location.href = "scan.html";
             }, 500);
-        });
-
-        forgotLink.addEventListener("click", (event) => {
-            event.preventDefault();
-            showMessage("เพื่อความปลอดภัย ระบบไม่แสดงรหัสผ่านเดิม กรุณาลงทะเบียนชื่อผู้ใช้อื่นหากจำรหัสไม่ได้", "error");
         });
     </script>
 </body>

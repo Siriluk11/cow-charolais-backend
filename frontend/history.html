@@ -4,90 +4,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>History</title>
+    <title>History - Charolais AI Scan</title>
 
-    <!-- ฟอนต์ -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS ใหม่ -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="./app.css">
 
-    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js"></script>
     <script src="./auth.js"></script>
 </head>
 
 <body>
     <script>requireLogin();</script>
 
-    <div class="page">
+    <main class="page">
 
-        <div class="hero">
-            <h1>History</h1>
-            <p>ประวัติการวิเคราะห์ทั้งหมดของคุณ</p>
-        </div>
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">
+                    <span class="emoji-icon">📊</span>
+                </div>
+                <div>
+                    <h1>History</h1>
+                    <p>ประวัติผลการสแกนย้อนหลัง แสดงรายการล่าสุดก่อน พร้อมระดับดาวและความมั่นใจ</p>
+                </div>
+            </div>
+        </section>
 
-        <div class="card">
-
+        <section class="card">
             <div class="section-title">
-                <h2>รายการทั้งหมด</h2>
-                <span class="pill" id="count">0 รายการ</span>
+                <h2>ประวัติการสแกน</h2>
+                <span class="pill" id="recordCount">0 รายการ</span>
             </div>
 
             <div class="button-row">
                 <a href="scan.html" class="btn btn-green">ไปหน้า Scan</a>
-                <button class="btn btn-red" onclick="clearHistory()">ล้างข้อมูล</button>
+                <button id="clearHistoryBtn" class="btn btn-red" type="button">ล้างประวัติ</button>
             </div>
 
             <div id="historyList"></div>
+        </section>
 
-        </div>
-
-    </div>
+    </main>
 
     <nav class="floating-nav">
-        <a href="scan.html">⌁<br>Scan</a>
-        <a href="history.html" class="active">◷<br>History</a>
-        <a href="profile.html">◎<br>Profile</a>
+        <a href="scan.html"><span class="nav-ico">✦</span>Scan</a>
+        <a href="history.html" class="active"><span class="nav-ico">◴</span>History</a>
+        <a href="profile.html"><span class="nav-ico">◉</span>Profile</a>
     </nav>
 
     <script>
-        const KEY = "cow_scan_history";
+        const LOCAL_HISTORY_KEY = "cow_scan_history";
 
-        function loadHistory() {
-            const list = JSON.parse(localStorage.getItem(KEY) || "[]");
-            const container = document.getElementById("historyList");
-            const count = document.getElementById("count");
+        function hasFunction(name) {
+            return typeof window[name] === "function";
+        }
 
-            count.textContent = list.length + " รายการ";
+        function getHistorySafe() {
+            try {
+                const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
 
-            if (!list.length) {
-                container.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูล</div>`;
+        async function loadHistoryData() {
+            if (hasFunction("getScanHistoryFromDB")) {
+                try {
+                    const dbData = await window.getScanHistoryFromDB(50);
+                    if (Array.isArray(dbData) && dbData.length) {
+                        return dbData.map(item => ({
+                            image: item.image_url || "",
+                            predictedClass: item.class_name || (item.score ? `คลาส ${item.score}` : "-"),
+                            star: item.score || 0,
+                            confidence: Number(item.confidence || 0).toFixed(2) + "%",
+                            createdAt: item.created_at ? new Date(item.created_at).toLocaleString("th-TH") : "-"
+                        }));
+                    }
+                } catch { }
+            }
+
+            return getHistorySafe();
+        }
+
+        async function renderHistory() {
+            const historyList = document.getElementById("historyList");
+            const recordCount = document.getElementById("recordCount");
+            const history = await loadHistoryData();
+
+            recordCount.textContent = history.length + " รายการ";
+
+            if (!history.length) {
+                historyList.innerHTML = `
+            <div class="empty-state">
+                ยังไม่มีประวัติการวิเคราะห์
+            </div>
+        `;
                 return;
             }
 
-            container.innerHTML = list.map(i => `
+            historyList.innerHTML = history.map(item => `
         <div class="history-item">
             <div class="history-row">
-                ${i.image ? `<img src="${i.image}" class="history-thumb">` : `<div class="history-thumb empty">◎</div>`}
+                ${item.image
+                    ? `<img class="history-thumb" src="${item.image}" alt="history image">`
+                    : `<div class="history-thumb empty">🐮</div>`
+                }
                 <div class="history-content">
-                    <h3>${i.predictedClass}</h3>
-                    <p>⭐ ${i.star} ดาว</p>
-                    <p>ความมั่นใจ ${i.confidence}</p>
-                    <p>${i.createdAt}</p>
+                    <h3>${item.predictedClass || "-"}</h3>
+                    <p><strong>ระดับดาว:</strong> ${item.star ? item.star + " ดาว" : "-"}</p>
+                    <p><strong>ความมั่นใจ:</strong> ${item.confidence || "-"}</p>
+                    <p><strong>เวลา:</strong> ${item.createdAt || "-"}</p>
                 </div>
             </div>
         </div>
     `).join("");
         }
 
-        function clearHistory() {
-            if (confirm("ลบทั้งหมด?")) {
-                localStorage.removeItem(KEY);
-                loadHistory();
-            }
+        function clearAllHistory() {
+            const ok = confirm("ต้องการลบประวัติทั้งหมดใช่หรือไม่");
+            if (!ok) return;
+
+            localStorage.removeItem(LOCAL_HISTORY_KEY);
+            renderHistory();
         }
 
-        loadHistory();
+        document.getElementById("clearHistoryBtn").addEventListener("click", clearAllHistory);
+        renderHistory();
     </script>
 
 </body>

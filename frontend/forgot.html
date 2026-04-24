@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Charolais AI Scan</title>
+    <title>Reset Password - Charolais AI Scan</title>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
@@ -20,46 +20,46 @@
                 <span>🐮</span>
             </div>
 
-            <h1 style="text-align:center;">ลงทะเบียน</h1>
+            <h1 style="text-align:center;">เปลี่ยนรหัสผ่าน</h1>
 
             <div class="subtitle">
-                สร้างบัญชีผู้ใช้สำหรับ Charolais AI Scan
+                กรอกชื่อผู้ใช้และตั้งรหัสผ่านใหม่
             </div>
 
             <div class="form-group">
                 <label for="username">ชื่อผู้ใช้</label>
-                <input id="username" type="text" placeholder="ใช้ภาษาไทยหรืออังกฤษได้">
+                <input id="username" type="text" placeholder="กรอกชื่อผู้ใช้">
             </div>
 
             <div class="form-group">
-                <label for="password">รหัสผ่าน</label>
-                <input id="password" type="password" placeholder="อย่างน้อย 8 ตัว และมี A-Z 1 ตัว">
+                <label for="newPassword">รหัสผ่านใหม่</label>
+                <input id="newPassword" type="password" placeholder="อย่างน้อย 8 ตัว และมี A-Z 1 ตัว">
             </div>
 
             <div class="form-group">
-                <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
-                <input id="confirmPassword" type="password" placeholder="กรอกรหัสผ่านอีกครั้ง">
+                <label for="confirmPassword">ยืนยันรหัสผ่านใหม่</label>
+                <input id="confirmPassword" type="password" placeholder="กรอกรหัสผ่านใหม่อีกครั้ง">
             </div>
 
-            <button class="btn btn-main" id="registerBtn" type="button">
-                สร้างบัญชี
+            <button class="btn btn-main" id="resetBtn" type="button">
+                ยืนยันเปลี่ยนรหัสผ่าน
             </button>
 
             <div class="message" id="message"></div>
 
-            <a class="link" href="index.html">มีบัญชีแล้ว เข้าสู่ระบบ</a>
+            <a class="link" href="index.html">กลับไปหน้าเข้าสู่ระบบ</a>
 
             <div class="note">
-                เงื่อนไขรหัสผ่าน: อย่างน้อย 8 ตัวอักษร และมีตัวอักษรภาษาอังกฤษตัวใหญ่ A-Z อย่างน้อย 1 ตัว
+                รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัว และมีตัวอักษรภาษาอังกฤษตัวใหญ่ A-Z อย่างน้อย 1 ตัว
             </div>
         </div>
     </div>
 
     <script>
         const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
+        const newPasswordInput = document.getElementById("newPassword");
         const confirmPasswordInput = document.getElementById("confirmPassword");
-        const registerBtn = document.getElementById("registerBtn");
+        const resetBtn = document.getElementById("resetBtn");
         const message = document.getElementById("message");
 
         function showMessage(text, type = "") {
@@ -68,22 +68,22 @@
             if (type) message.classList.add(type);
         }
 
-        registerBtn.addEventListener("click", async () => {
+        resetBtn.addEventListener("click", async () => {
             const username = usernameInput.value.trim();
-            const password = passwordInput.value;
+            const newPassword = newPasswordInput.value;
             const confirmPassword = confirmPasswordInput.value;
 
-            if (!username || !password || !confirmPassword) {
+            if (!username || !newPassword || !confirmPassword) {
                 showMessage("กรุณากรอกข้อมูลให้ครบ", "error");
                 return;
             }
 
-            if (password !== confirmPassword) {
-                showMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน", "error");
+            if (newPassword !== confirmPassword) {
+                showMessage("รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน", "error");
                 return;
             }
 
-            const result = await registerUser(username, password);
+            const result = await resetPassword(username, newPassword);
 
             if (!result.ok) {
                 showMessage(result.message, "error");
