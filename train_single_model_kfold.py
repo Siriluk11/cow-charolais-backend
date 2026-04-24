@@ -4,13 +4,13 @@ import random
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
+import pandas as pd # type: ignore
 import tensorflow as tf
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # type: ignore
 
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import accuracy_score, f1_score, classification_report
-from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import StratifiedKFold # type: ignore
+from sklearn.metrics import accuracy_score, f1_score, classification_report # type: ignore
+from sklearn.preprocessing import LabelEncoder # type: ignore
 
 # =========================
 # ตั้งค่าเริ่มต้น
@@ -49,7 +49,23 @@ MODEL_SAVE_DIR.mkdir(parents=True, exist_ok=True)
 # =========================
 # เลือกโมเดลทีละตัว
 # =========================
-MODEL_NAME = "Xception"
+MODEL_NAME = "EfficientNetB1"
+
+# ตัวอย่าง
+# MODEL_NAME = "MobileNet"
+# MODEL_NAME = "MobileNetV2"
+# MODEL_NAME = "MobileNetV3Small"
+# MODEL_NAME = "MobileNetV3Large"
+# MODEL_NAME = "NASNetMobile"
+# MODEL_NAME = "EfficientNetB0"
+# MODEL_NAME = "EfficientNetB1"
+# MODEL_NAME = "ResNet50V2"
+# MODEL_NAME = "InceptionV3"
+# MODEL_NAME = "Xception"
+
+# =========================
+# PARAMETER
+# =========================
 KFOLDS = 5
 EPOCHS = 1000                 # เริ่มที่ 400 ก่อน
 LEARNING_RATE = 0.0001        # ถ้ายังไม่ดีค่อยเปลี่ยนเป็น 0.0001
@@ -173,8 +189,8 @@ print(df["label"].value_counts())
 le = LabelEncoder()
 le.fit(pd.concat([df["label"], test_df["label"]], axis=0))
 
-df["label_id"] = le.transform(df["label"])
-test_df["label_id"] = le.transform(test_df["label"])
+df["label_id"] = le.transform(df["label"]) # type: ignore
+test_df["label_id"] = le.transform(test_df["label"]) # type: ignore
 
 class_names = list(le.classes_)
 num_classes = len(class_names)
@@ -371,7 +387,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(df["filepath"], df["label_
         "model": MODEL_NAME,
         "fold": fold,
         "accuracy": round(acc, 4),
-        "f1_score": round(f1, 4),
+        "f1_score": round(f1, 4), # type: ignore
         "epochs_requested": EPOCHS,
         "epochs_trained": trained_epochs,
         "learning_rate": LEARNING_RATE,
@@ -426,13 +442,13 @@ y_test = test_df["label_id"].values
 
 # แบ่งบางส่วนจาก full เป็น validation สำหรับ final training callbacks
 # ใช้ 10% ของ full เป็น validation ชั่วคราว
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split # type: ignore
 
 x_train_final, x_val_final, y_train_final, y_val_final = train_test_split(
     x_full,
     y_full,
     test_size=0.1,
-    stratify=y_full,
+    stratify=y_full, # type: ignore
     random_state=SEED
 )
 
@@ -503,7 +519,7 @@ print(report_text)
 test_result_df = pd.DataFrame([{
     "model": MODEL_NAME,
     "test_accuracy": round(test_acc, 4),
-    "test_f1_score": round(test_f1, 4),
+    "test_f1_score": round(test_f1, 4), # type: ignore
     "epochs_requested": EPOCHS,
     "learning_rate": LEARNING_RATE,
     "batch_size": BATCH_SIZE
@@ -513,7 +529,7 @@ test_csv = CSV_DIR / f"{MODEL_NAME}_test_results.csv"
 test_result_df.to_csv(test_csv, index=False, encoding="utf-8-sig")
 
 with open(CSV_DIR / f"{MODEL_NAME}_classification_report.txt", "w", encoding="utf-8") as f:
-    f.write(report_text)
+    f.write(report_text) # type: ignore
 
 # final graphs
 plt.figure(figsize=(8, 5))
