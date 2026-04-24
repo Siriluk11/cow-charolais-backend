@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Charolais AI Scan</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f6fbf7;
+            --bg2: #edf7f0;
+            --surface: #ffffff;
+            --surface-soft: #f9fdf9;
+            --text: #173126;
+            --muted: #6b7d73;
+            --green: #21b66f;
+            --green-dark: #148552;
+            --green-soft: #dff8e9;
+            --green-soft-2: #eefcf3;
+            --blue: #4c82ff;
+            --red: #ff5b6e;
+            --yellow: #ffb200;
+            --border: #e3f1e8;
+            --shadow: 0 18px 45px rgba(20, 50, 35, .08);
+            --shadow-soft: 0 10px 24px rgba(33, 182, 111, .14);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100dvh;
+            background:
+                radial-gradient(circle at top left, rgba(33, 182, 111, .10), transparent 25%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+        }
+
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100dvh;
+            padding: 20px 14px 120px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 32px;
+            padding: 22px 18px;
+            background: linear-gradient(135deg, #16985d 0%, #27c878 100%);
+            color: #fff;
+            box-shadow: 0 20px 45px rgba(33, 182, 111, .28);
+            margin-bottom: 18px;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .10);
+            right: -65px;
+            top: -55px;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .08);
+            left: -35px;
+            bottom: -35px;
+        }
+
+        .hero-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .20);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-icon span {
+            font-size: 34px;
+            line-height: 1;
+        }
+
+        .hero-text h1 {
+            margin: 0;
+            font-size: 28px;
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .hero-text p {
+            margin: 8px 0 0;
+            font-size: 13px;
+            line-height: 1.7;
+            font-family: 'Noto Sans Thai', sans-serif;
+            max-width: 290px;
+        }
+
+        .section {
+            margin-top: 18px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title h2 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 800;
+            color: #145337;
+        }
+
+        .section-title span {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .camera-stage {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 24px;
+            background: linear-gradient(180deg, #0d1728 0%, #0a1320 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video,
+        #previewImage,
+        #capturedImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .camera-placeholder {
+            text-align: center;
+            color: rgba(255, 255, 255, .90);
+            font-size: 15px;
+            line-height: 1.75;
+            padding: 24px;
+            font-family: 'Noto Sans Thai', sans-serif;
+            font-weight: 600;
+        }
+
+        .scan-frame {
+            position: absolute;
+            width: 72%;
+            height: 72%;
+            border: 3px solid rgba(255, 255, 255, .92);
+            border-radius: 26px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, .16);
+            display: none;
+            pointer-events: none;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 18px;
+            padding: 14px 12px;
+            font-size: 14px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+            cursor: pointer;
+            transition: .18s ease;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #4a7dff, #6797ff);
+            color: #fff;
+        }
+
+        .btn-light {
+            background: #f2f5f7;
+            color: #223038;
+            box-shadow: none;
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, #14965c, #29c979);
+            color: #fff;
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #ff586c, #ff6f57);
+            color: #fff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            font-family: 'Noto Sans Thai', sans-serif;
+            background: linear-gradient(135deg, #dcfce8, #c7f7d8);
+            color: #0e7b49;
+        }
+
+        .status-badge.error {
+            background: linear-gradient(135deg, #ffe5e9, #ffd5dc);
+            color: #b72742;
+        }
+
+        .status-badge.warning {
+            background: linear-gradient(135deg, #fff3cf, #ffe39c);
+            color: #9a6800;
+        }
+
+        .result-text {
+            min-height: 60px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #2a3b32;
+            font-family: 'Noto Sans Thai', sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            text-align: center;
+            font-size: 46px;
+            color: var(--yellow);
+            line-height: 1.1;
+            letter-spacing: 4px;
+            margin: 14px 0 12px;
+            font-weight: 800;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .result-box {
+            background: linear-gradient(180deg, #fff 0%, var(--green-soft-2) 100%);
+            border: 1px solid #e3f4e8;
+            border-radius: 22px;
+            min-height: 110px;
+            padding: 14px 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-box .label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-family: 'Noto Sans Thai', sans-serif;
+        }
+
+        .result-box .value {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.35;
+            color: #145337;
+            word-break: break-word;
+        }
+
+        .save-note {
+            min-height: 18px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
+            font-family: 'Noto Sans Thai', sans-serif;
+            font-weight: 700;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            border-radius: 22px;
+            padding: 14px;
+            background: linear-gradient(180deg, #fff 0%, #f7fdf8 100%);
+            border: 1px solid #e7f3ea;
+        }
+
+        .history-item strong {
+            color: #145337;
+            font-size: 15px;
+        }
+
+        .history-item div {
+            margin-top: 4px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #53655c;
+            font-family: 'Noto Sans Thai', sans-serif;
+        }
+
+        .floating-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            width: min(470px, calc(100% - 18px));
+            background: rgba(255, 255, 255, .86);
+            border: 1px solid rgba(226, 240, 231, .95);
+            box-shadow: 0 16px 40px rgba(15, 35, 24, .12);
+            border-radius: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+            backdrop-filter: blur(16px);
+            z-index: 999;
+        }
+
+        .floating-nav a {
+            text-decoration: none;
+            color: #1f533b;
+            text-align: center;
+            padding: 9px 4px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .floating-nav a.active {
+            background: linear-gradient(135deg, #14965c, #29c979);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(33, 182, 111, .26);
+        }
+
+        .nav-ico {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width:480px) {
+            .app {
+                padding: 16px 12px 118px;
+            }
+
+            .hero {
+                padding: 18px 16px;
+                border-radius: 28px;
+            }
+
+            .hero-text h1 {
+                font-size: 24px;
+            }
+
+            .hero-icon {
+                width: 58px;
+                height: 58px;
+                border-radius: 18px;
+            }
+
+            .hero-icon span {
+                font-size: 28px;
+            }
+
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .btn {
+                font-size: 13px;
+                padding: 13px 10px;
+            }
+
+            .stars {
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <section class="hero">
+            <div class="hero-top">
+                <div class="hero-icon"><span>🌿</span></div>
+                <div class="hero-text">
+                    <h1>Charolais<br>AI Scan</h1>
+                    <p>สแกนและวิเคราะห์ความสวยงามใบหน้าวัวด้วยระบบ Classification แบบ 1–5 ดาว ในดีไซน์ที่เรียบและทันสมัย
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>สแกนด้วยกล้อง / อัปโหลดภาพ</h2>
+                <span>Scan</span>
+            </div>
+
+            <div class="card">
+                <div class="camera-stage" id="cameraStage">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <img id="previewImage" alt="Preview image">
+                    <canvas id="capturedImage"></canvas>
+                    <div class="scan-frame" id="scanFrame"></div>
+                    <div class="camera-placeholder" id="placeholder">
+                        พร้อมใช้งานสำหรับการสแกนภาพ<br>
+                        กดเปิดกล้อง หรืออัปโหลดรูปจากเครื่อง
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-blue" id="startCameraBtn">เปิดกล้อง</button>
+                    <button class="btn btn-light" id="captureBtn" disabled>สแกนและวิเคราะห์</button>
+                    <button class="btn btn-green" id="uploadBtn">อัปโหลดรูปจากเครื่อง</button>
+                    <button class="btn btn-red" id="resetBtn">ล้างภาพ</button>
+                </div>
+
+                <input type="file" id="imageUpload" class="file-input" accept="image/*">
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>ผลการวิเคราะห์</h2>
+                <span>Result</span>
+            </div>
+
+            <div class="card">
+                <div class="status-badge" id="statusBadge">กำลังเชื่อมต่อ AI...</div>
+
+                <div class="result-text" id="resultText">
+                    กรุณารอระบบเชื่อมต่อ AI ให้เสร็จ จากนั้นเปิดกล้องหรืออัปโหลดภาพเพื่อวิเคราะห์
+                </div>
+
+                <div class="stars" id="starDisplay">☆☆☆☆☆</div>
+
+                <div class="result-grid">
+                    <div class="result-box">
+                        <div class="label">ความมั่นใจ</div>
+                        <div class="value" id="confidenceValue">-</div>
+                    </div>
+
+                    <div class="result-box">
+                        <div class="label">คลาสที่ทำนาย</div>
+                        <div class="value" id="classValue">-</div>
+                    </div>
+
+                    <div class="result-box">
+                        <div class="label">ระดับดาว</div>
+                        <div class="value" id="scoreValue">-</div>
+                    </div>
+
+                    <div class="result-box">
+                        <div class="label">สถานะกล้อง</div>
+                        <div class="value" id="cameraStatus">ยังไม่เปิด</div>
+                    </div>
+                </div>
+
+                <div class="save-note" id="saveNote"></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>ประวัติล่าสุด</h2>
+                <span>Recent</span>
+            </div>
+
+            <div class="card">
+                <ul class="history-list" id="historyPreviewList">
+                    <li class="history-item">
+                        <strong>ยังไม่มีประวัติการวิเคราะห์</strong>
+                        <div>เมื่อสแกนสำเร็จ ข้อมูลล่าสุดจะมาแสดงที่นี่</div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <nav class="floating-nav">
+        <a href="index.html" class="active"><span class="nav-ico">🐄</span>Scan</a>
+        <a href="history.html"><span class="nav-ico">🕘</span>History</a>
+        <a href="profile.html"><span class="nav-ico">🌿</span>Profile</a>
+    </nav>
+
+    <script>
+        const API_URL = "https://cow-charolais-backend.onrender.com";
+        const LOCAL_HISTORY_KEY = "cow_scan_history";
+
+        const webcam = document.getElementById("webcam");
+        const previewImage = document.getElementById("previewImage");
+        const capturedImage = document.getElementById("capturedImage");
+        const placeholder = document.getElementById("placeholder");
+        const scanFrame = document.getElementById("scanFrame");
+
+        const statusBadge = document.getElementById("statusBadge");
+        const resultText = document.getElementById("resultText");
+        const starDisplay = document.getElementById("starDisplay");
+        const confidenceValue = document.getElementById("confidenceValue");
+        const classValue = document.getElementById("classValue");
+        const scoreValue = document.getElementById("scoreValue");
+        const cameraStatus = document.getElementById("cameraStatus");
+        const historyPreviewList = document.getElementById("historyPreviewList");
+        const saveNote = document.getElementById("saveNote");
+
+        const startCameraBtn = document.getElementById("startCameraBtn");
+        const captureBtn = document.getElementById("captureBtn");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const imageUpload = document.getElementById("imageUpload");
+
+        let stream = null;
+        let imageReady = false;
+        let usingUploadedImage = false;
+
+        function showElement(el, displayType = "block") {
+            el.style.display = displayType;
+        }
+
+        function hideElement(el) {
+            el.style.display = "none";
+        }
+
+        function hasFunction(name) {
+            return typeof window[name] === "function";
+        }
+
+        function renderStars(score) {
+            const s = Math.max(0, Math.min(5, Number(score) || 0));
+            return "★".repeat(s) + "☆".repeat(5 - s);
+        }
+
+        function extractScore(result) {
+            const direct = Number(result.score ?? result.stars ?? result.star ?? result.rating);
+            if (Number.isFinite(direct) && direct >= 1 && direct <= 5) return direct;
+
+            const className = String(result.class_name ?? result.predicted_class ?? result.class ?? "");
+            const match = className.match(/([1-5])/);
+            if (match) return Number(match[1]);
+
+            return 0;
+        }
+
+        function normalizeConfidence(rawConfidence) {
+            const n = Number(rawConfidence);
+            if (!Number.isFinite(n)) return "-";
+            if (n <= 1) return (n * 100).toFixed(2) + "%";
+            return n.toFixed(2) + "%";
+        }
+
+        function getNumericConfidence(rawConfidence) {
+            const n = Number(rawConfidence);
+            if (!Number.isFinite(n)) return 0;
+            return n <= 1 ? Number((n * 100).toFixed(2)) : Number(n.toFixed(2));
+        }
+
+        function setStatus(type, text) {
+            statusBadge.classList.remove("error", "warning");
+            if (type === "error") statusBadge.classList.add("error");
+            if (type === "warning") statusBadge.classList.add("warning");
+            statusBadge.textContent = text;
+        }
+
+        function getLocalHistory() {
+            try {
+                const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                console.error("อ่าน local history ไม่สำเร็จ:", error);
+                return [];
+            }
+        }
+
+        function saveLocalHistory(item) {
+            try {
+                const list = getLocalHistory();
+                list.unshift(item);
+                localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(list.slice(0, 30)));
+                return true;
+            } catch (error) {
+                console.error("บันทึก local history ไม่สำเร็จ:", error);
+                return false;
+            }
+        }
+
+        async function compressImageForHistory(blob, maxWidth = 720, quality = 0.72) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+
+                img.onload = () => {
+                    const ratio = img.width > maxWidth ? maxWidth / img.width : 1;
+                    const canvas = document.createElement("canvas");
+                    canvas.width = Math.round(img.width * ratio);
+                    canvas.height = Math.round(img.height * ratio);
+
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    canvas.toBlob((newBlob) => {
+                        URL.revokeObjectURL(url);
+                        if (newBlob) resolve(newBlob);
+                        else reject(new Error("ย่อรูปไม่สำเร็จ"));
+                    }, "image/jpeg", quality);
+                };
+
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error("โหลดรูปเพื่อย่อไม่สำเร็จ"));
+                };
+
+                img.src = url;
+            });
+        }
+
+        async function fileToDataURL(fileOrBlob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(fileOrBlob);
+            });
+        }
+
+        async function buildHistoryItem(blob, className, score, confidenceText) {
+            try {
+                const compressed = await compressImageForHistory(blob);
+                const imageDataUrl = await fileToDataURL(compressed);
+
+                return {
+                    image: imageDataUrl,
+                    predictedClass: className,
+                    star: score,
+                    confidence: confidenceText,
+                    createdAt: new Date().toLocaleString("th-TH")
+                };
+            } catch (error) {
+                return {
+                    image: "",
+                    predictedClass: className,
+                    star: score,
+                    confidence: confidenceText,
+                    createdAt: new Date().toLocaleString("th-TH")
+                };
+            }
+        }
+
+        function renderHistoryPreviewFromLocal() {
+            const data = getLocalHistory();
+
+            if (!data.length) {
+                historyPreviewList.innerHTML = `
+          <li class="history-item">
+            <strong>ยังไม่มีประวัติการวิเคราะห์</strong>
+            <div>เมื่อสแกนสำเร็จ ข้อมูลล่าสุดจะมาแสดงที่นี่</div>
+          </li>
+        `;
+                return;
+            }
+
+            historyPreviewList.innerHTML = data.slice(0, 5).map(item => `
+        <li class="history-item">
+          <strong>${renderStars(item.star)} | ${item.predictedClass || "-"}</strong>
+          <div>ความมั่นใจ ${item.confidence || "-"}</div>
+          <div>${item.createdAt || "-"}</div>
+        </li>
+      `).join("");
+        }
+
+        async function renderHistoryPreview() {
+            if (hasFunction("getScanHistoryFromDB")) {
+                try {
+                    const data = await window.getScanHistoryFromDB(5);
+                    if (Array.isArray(data) && data.length) {
+                        historyPreviewList.innerHTML = data.map(item => `
+              <li class="history-item">
+                <strong>${renderStars(item.score)} | ${item.class_name || "คลาส " + (item.score || "-")}</strong>
+                <div>ความมั่นใจ ${Number(item.confidence || 0).toFixed(2)}%</div>
+                <div>${item.created_at ? new Date(item.created_at).toLocaleString("th-TH") : "-"}</div>
+              </li>
+            `).join("");
+                        return;
+                    }
+                } catch (error) {
+                    console.error("โหลดประวัติจาก DB ไม่สำเร็จ:", error);
+                }
+            }
+
+            renderHistoryPreviewFromLocal();
+        }
+
+        async function loadModel() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (!response.ok) throw new Error("AI backend not ready");
+
+                setStatus("success", "ระบบพร้อมใช้งาน");
+                resultText.textContent = "ระบบพร้อมใช้งานแล้ว สามารถเปิดกล้องหรืออัปโหลดภาพได้";
+                saveNote.textContent = "";
+            } catch (error) {
+                console.error("เชื่อมต่อ AI ไม่สำเร็จ:", error);
+                setStatus("warning", "ระบบกำลังเตรียมพร้อม");
+                resultText.textContent = "กำลังเชื่อมต่อระบบวิเคราะห์ กรุณารอสักครู่แล้วลองใหม่อีกครั้ง";
+                saveNote.textContent = "";
+            }
+        }
+
+        async function startCamera() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("อุปกรณ์นี้ไม่รองรับกล้อง");
+                }
+
+                if (stream) stopCamera();
+
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+
+                webcam.srcObject = stream;
+                showElement(webcam, "block");
+                hideElement(previewImage);
+                hideElement(capturedImage);
+                showElement(scanFrame, "block");
+                hideElement(placeholder);
+
+                imageReady = true;
+                usingUploadedImage = false;
+                captureBtn.disabled = false;
+                cameraStatus.textContent = "เปิดใช้งานแล้ว";
+                resultText.textContent = "กล้องพร้อมใช้งานแล้ว กดสแกนและวิเคราะห์ได้";
+                saveNote.textContent = "";
+            } catch (error) {
+                console.error("เปิดกล้องไม่สำเร็จ:", error);
+                cameraStatus.textContent = "เปิดไม่สำเร็จ";
+                resultText.textContent = "ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตสิทธิ์การใช้กล้อง หรือใช้อัปโหลดรูปแทน";
+                saveNote.textContent = "";
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            webcam.srcObject = null;
+        }
+
+        function resetView() {
+            stopCamera();
+
+            hideElement(webcam);
+            hideElement(previewImage);
+            hideElement(capturedImage);
+            hideElement(scanFrame);
+            showElement(placeholder, "block");
+
+            imageReady = false;
+            usingUploadedImage = false;
+            captureBtn.disabled = true;
+            imageUpload.value = "";
+
+            starDisplay.textContent = "☆☆☆☆☆";
+            confidenceValue.textContent = "-";
+            classValue.textContent = "-";
+            scoreValue.textContent = "-";
+            cameraStatus.textContent = "ยังไม่เปิด";
+            saveNote.textContent = "";
+
+            loadModel();
+        }
+
+        function handleUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            stopCamera();
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                showElement(previewImage, "block");
+                hideElement(webcam);
+                hideElement(capturedImage);
+                hideElement(scanFrame);
+                hideElement(placeholder);
+
+                imageReady = true;
+                usingUploadedImage = true;
+                captureBtn.disabled = false;
+                cameraStatus.textContent = "ใช้งานภาพอัปโหลด";
+                resultText.textContent = "อัปโหลดภาพสำเร็จแล้ว กดสแกนและวิเคราะห์ได้";
+                saveNote.textContent = "";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function captureFrameToCanvas() {
+            const ctx = capturedImage.getContext("2d");
+            const w = webcam.videoWidth || 640;
+            const h = webcam.videoHeight || 640;
+
+            capturedImage.width = w;
+            capturedImage.height = h;
+            ctx.drawImage(webcam, 0, 0, w, h);
+
+            hideElement(webcam);
+            hideElement(scanFrame);
+            showElement(capturedImage, "block");
+            stopCamera();
+        }
+
+        async function canvasToBlob(canvas) {
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error("สร้าง blob ไม่สำเร็จ"));
+                }, "image/jpeg", 0.92);
+            });
+        }
+
+        async function saveEverywhere(historyItem, dbPayload) {
+            let localSaved = false;
+            let dbSaved = false;
+
+            localSaved = saveLocalHistory(historyItem);
+
+            if (!localSaved) {
+                try {
+                    const fallbackItem = { ...historyItem, image: "" };
+                    localSaved = saveLocalHistory(fallbackItem);
+                } catch (error) { }
+            }
+
+            if (hasFunction("saveScanResultToDB")) {
+                try {
+                    await window.saveScanResultToDB(dbPayload);
+                    dbSaved = true;
+                } catch (error) {
+                    console.error("บันทึก DB ไม่สำเร็จ:", error);
+                }
+            }
+
+            return { localSaved, dbSaved };
+        }
+
+        async function analyzeImage() {
+            if (!imageReady) {
+                resultText.textContent = "กรุณาเปิดกล้องหรืออัปโหลดภาพก่อน";
+                return;
+            }
+
+            try {
+                setStatus("success", "กำลังวิเคราะห์...");
+                resultText.textContent = "ระบบกำลังประมวลผลภาพ กรุณารอสักครู่";
+                saveNote.textContent = "";
+
+                let blob;
+
+                if (usingUploadedImage) {
+                    const response = await fetch(previewImage.src);
+                    blob = await response.blob();
+                } else if (webcam.srcObject) {
+                    captureFrameToCanvas();
+                    blob = await canvasToBlob(capturedImage);
+                } else if (capturedImage.style.display === "block") {
+                    blob = await canvasToBlob(capturedImage);
+                } else {
+                    resultText.textContent = "ไม่พบภาพสำหรับวิเคราะห์";
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("file", blob, "cow.jpg");
+
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    let errorMessage = "Prediction failed";
+                    try {
+                        const err = await response.json();
+                        errorMessage = err.detail || errorMessage;
+                    } catch (_) { }
+                    throw new Error(errorMessage);
+                }
+
+                const result = await response.json();
+
+                const score = extractScore(result);
+                const className = String(
+                    result.class_name ??
+                    result.predicted_class ??
+                    result.class ??
+                    (score ? `คลาส ${score}` : "-")
+                );
+
+                const rawConfidence = result.confidence ?? result.probability ?? result.score_confidence ?? 0;
+                const confidenceText = normalizeConfidence(rawConfidence);
+                const confidenceNumber = getNumericConfidence(rawConfidence);
+                const stars = renderStars(score);
+                const sourceType = usingUploadedImage ? "upload" : "camera";
+
+                setStatus("success", "วิเคราะห์สำเร็จ");
+                resultText.textContent = `ผลการวิเคราะห์: อยู่ในระดับ ${score} ดาว จาก ${className}`;
+                starDisplay.textContent = stars;
+                confidenceValue.textContent = confidenceText;
+                classValue.textContent = className;
+                scoreValue.textContent = `${score} ดาว`;
+                cameraStatus.textContent = usingUploadedImage ? "ใช้งานภาพอัปโหลด" : "สแกนจากกล้อง";
+
+                const historyItem = await buildHistoryItem(blob, className, score, confidenceText);
+
+                const saveResult = await saveEverywhere(historyItem, {
+                    className,
+                    score,
+                    confidence: confidenceNumber,
+                    sourceType
+                });
+
+                if (saveResult.localSaved && saveResult.dbSaved) {
+                    saveNote.textContent = "บันทึกประวัติสำเร็จ";
+                } else if (saveResult.localSaved && !saveResult.dbSaved) {
+                    setStatus("warning", "วิเคราะห์สำเร็จ แต่บันทึกฐานข้อมูลไม่สำเร็จ");
+                    saveNote.textContent = "AI วิเคราะห์สำเร็จ และบันทึกในเครื่องแล้ว แต่บันทึกฐานข้อมูลไม่สำเร็จ";
+                } else if (!saveResult.localSaved && saveResult.dbSaved) {
+                    setStatus("warning", "วิเคราะห์สำเร็จ แต่บันทึกในเครื่องไม่สำเร็จ");
+                    saveNote.textContent = "AI วิเคราะห์สำเร็จ และบันทึกฐานข้อมูลแล้ว แต่บันทึกในเครื่องไม่สำเร็จ";
+                } else {
+                    setStatus("warning", "วิเคราะห์สำเร็จ แต่บันทึกประวัติไม่สำเร็จ");
+                    saveNote.textContent = "AI วิเคราะห์สำเร็จแล้ว แต่บันทึกประวัติไม่สำเร็จ";
+                }
+
+                await renderHistoryPreview();
+            } catch (error) {
+                console.error("วิเคราะห์ไม่สำเร็จ:", error);
+                setStatus("error", "วิเคราะห์ไม่สำเร็จ");
+                resultText.textContent = "เกิดข้อผิดพลาดระหว่างวิเคราะห์ภาพ กรุณาลองใหม่อีกครั้ง";
+                saveNote.textContent = "";
+            }
+        }
+
+        startCameraBtn.addEventListener("click", startCamera);
+        captureBtn.addEventListener("click", analyzeImage);
+        uploadBtn.addEventListener("click", () => imageUpload.click());
+        imageUpload.addEventListener("change", handleUpload);
+        resetBtn.addEventListener("click", resetView);
+
+        renderHistoryPreview();
+        loadModel();
+    </script>
+</body>
+
+</html>

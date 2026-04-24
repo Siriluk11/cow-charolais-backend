@@ -49,7 +49,7 @@ MODEL_SAVE_DIR.mkdir(parents=True, exist_ok=True)
 # =========================
 # เลือกโมเดลทีละตัว
 # =========================
-MODEL_NAME = "EfficientNetB1"
+MODEL_NAME = "Xception"
 KFOLDS = 5
 EPOCHS = 1000                 # เริ่มที่ 400 ก่อน
 LEARNING_RATE = 0.0001        # ถ้ายังไม่ดีค่อยเปลี่ยนเป็น 0.0001
