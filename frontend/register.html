@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Login - Charolais AI Scan</title>
+    <title>Register - Charolais AI Scan</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,20 +144,6 @@
             box-shadow: 0 14px 30px rgba(15, 107, 69, .22);
         }
 
-        .link-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 18px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .link-row a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
         .message {
             min-height: 22px;
             margin-top: 14px;
@@ -175,6 +161,16 @@
 
         .message.success {
             color: var(--primary);
+        }
+
+        .link {
+            display: block;
+            margin-top: 16px;
+            text-align: center;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
         }
 
         .note {
@@ -195,40 +191,40 @@
         <div class="auth-card">
             <div class="brand-icon">
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M5 10.5C5 6.9 8.1 4 12 4s7 2.9 7 6.5V13c0 3.9-3.1 7-7 7s-7-3.1-7-7v-2.5Z"
+                    <path d="M12 3v18M5 8h14M5 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
                         stroke="currentColor" stroke-width="2" />
-                    <path d="M8 5 6 2M16 5l2-3M9 12h.01M15 12h.01M9.5 16c1.5 1 3.5 1 5 0" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" />
                 </svg>
             </div>
 
-            <h1>เข้าสู่ระบบ</h1>
+            <h1>ลงทะเบียน</h1>
             <div class="subtitle">
-                Charolais AI Scan<br>
-                ระบบวิเคราะห์ความสวยงามใบหน้าโคพันธุ์ชาโรเล่ส์
+                สร้างบัญชีผู้ใช้สำหรับ Charolais AI Scan
             </div>
 
             <div class="form-group">
                 <label for="username">ชื่อผู้ใช้</label>
-                <input id="username" type="text" placeholder="ชื่อผู้ใช้ภาษาไทยหรืออังกฤษ">
+                <input id="username" type="text" placeholder="ใช้ภาษาไทยหรืออังกฤษได้">
             </div>
 
             <div class="form-group">
                 <label for="password">รหัสผ่าน</label>
-                <input id="password" type="password" placeholder="กรอกรหัสผ่าน">
+                <input id="password" type="password" placeholder="อย่างน้อย 8 ตัว และมี A-Z 1 ตัว">
             </div>
 
-            <button class="btn btn-main" id="loginBtn" type="button">เข้าสู่ระบบ</button>
-
-            <div class="link-row">
-                <a href="register.html">ลงทะเบียน</a>
-                <a href="#" id="forgotLink">ลืมรหัสผ่าน?</a>
+            <div class="form-group">
+                <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+                <input id="confirmPassword" type="password" placeholder="กรอกรหัสผ่านอีกครั้ง">
             </div>
+
+            <button class="btn btn-main" id="registerBtn" type="button">สร้างบัญชี</button>
 
             <div class="message" id="message"></div>
 
+            <a class="link" href="index.html">มีบัญชีแล้ว เข้าสู่ระบบ</a>
+
             <div class="note">
-                ระบบนี้บันทึกบัญชีผู้ใช้และโปรไฟล์แยกตามชื่อผู้ใช้ พร้อมเข้ารหัสรหัสผ่านก่อนจัดเก็บในเครื่อง
+                เงื่อนไขรหัสผ่าน: ต้องมีอย่างน้อย 8 ตัวอักษร และมีตัวอักษรภาษาอังกฤษตัวใหญ่ A-Z อย่างน้อย 1 ตัว
             </div>
         </div>
     </div>
@@ -236,8 +232,8 @@
     <script>
         const usernameInput = document.getElementById("username");
         const passwordInput = document.getElementById("password");
-        const loginBtn = document.getElementById("loginBtn");
-        const forgotLink = document.getElementById("forgotLink");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const registerBtn = document.getElementById("registerBtn");
         const message = document.getElementById("message");
 
         function showMessage(text, type = "") {
@@ -246,8 +242,17 @@
             if (type) message.classList.add(type);
         }
 
-        loginBtn.addEventListener("click", async () => {
-            const result = await loginUser(usernameInput.value, passwordInput.value);
+        registerBtn.addEventListener("click", async () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password !== confirmPassword) {
+                showMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน", "error");
+                return;
+            }
+
+            const result = await registerUser(username, password);
 
             if (!result.ok) {
                 showMessage(result.message, "error");
@@ -257,13 +262,8 @@
             showMessage(result.message, "success");
 
             setTimeout(() => {
-                window.location.href = "scan.html";
-            }, 500);
-        });
-
-        forgotLink.addEventListener("click", (event) => {
-            event.preventDefault();
-            showMessage("เพื่อความปลอดภัย ระบบไม่แสดงรหัสผ่านเดิม กรุณาลงทะเบียนชื่อผู้ใช้อื่นหากจำรหัสไม่ได้", "error");
+                window.location.href = "index.html";
+            }, 800);
         });
     </script>
 </body>

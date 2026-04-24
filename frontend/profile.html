@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
         rel="stylesheet">
+
+    <script src="./auth.js"></script>
 
     <style>
         * {
@@ -18,18 +20,15 @@
         }
 
         :root {
-            --bg: #f6fbf7;
-            --bg2: #edf7f0;
-            --surface: #ffffff;
-            --text: #173126;
-            --muted: #6b7d73;
-            --green: #21b66f;
-            --green-dark: #148552;
-            --green-soft: #eefbf3;
-            --border: #e3f1e8;
-            --red: #ff5b6e;
-            --shadow: 0 18px 45px rgba(20, 50, 35, .08);
-            --shadow-soft: 0 10px 24px rgba(33, 182, 111, .14);
+            --primary: #0f6b45;
+            --primary-2: #19a96b;
+            --primary-soft: #e9f8f0;
+            --ink: #10231b;
+            --muted: #65756d;
+            --card: rgba(255, 255, 255, .86);
+            --line: rgba(15, 107, 69, .14);
+            --shadow: 0 24px 70px rgba(16, 35, 27, .14);
+            --danger: #c0394f;
         }
 
         html,
@@ -38,80 +37,119 @@
             padding: 0;
             min-height: 100dvh;
             background:
-                radial-gradient(circle at top left, rgba(33, 182, 111, .10), transparent 25%),
-                linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
-            color: var(--text);
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+                radial-gradient(circle at top left, rgba(25, 169, 107, .20), transparent 30%),
+                radial-gradient(circle at top right, rgba(73, 104, 217, .10), transparent 30%),
+                linear-gradient(180deg, #f5fbf7 0%, #eaf4ef 100%);
+            color: var(--ink);
+            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
         }
 
         .app {
-            max-width: 500px;
+            max-width: 520px;
             margin: 0 auto;
             min-height: 100dvh;
-            padding: 20px 14px 120px;
+            padding: 18px 14px 126px;
         }
 
-        .top-header {
-            text-align: center;
+        .top-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 34px;
+            padding: 24px 18px;
+            color: #fff;
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, .22), transparent 28%),
+                linear-gradient(135deg, #073d27 0%, #0f6b45 48%, #19a96b 100%);
+            box-shadow: 0 24px 60px rgba(15, 107, 69, .25);
             margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .top-card::before {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -90px;
+            top: -90px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .10);
         }
 
         .top-avatar {
+            position: relative;
+            z-index: 1;
             width: 98px;
             height: 98px;
-            margin: 0 auto 16px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #14965c, #29c979);
+            margin: 0 auto 14px;
+            border-radius: 32px;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .22);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
             color: #fff;
-            box-shadow: 0 18px 36px rgba(33, 182, 111, .24);
         }
 
-        .top-header h1 {
+        .top-avatar svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .top-card h1 {
+            position: relative;
+            z-index: 1;
             margin: 0;
-            font-size: 30px;
+            font-size: 32px;
             font-weight: 800;
-            letter-spacing: -.02em;
+            letter-spacing: -.04em;
         }
 
-        .top-header p {
+        .top-card p {
+            position: relative;
+            z-index: 1;
             margin: 8px 0 0;
             font-size: 14px;
-            color: var(--muted);
+            color: rgba(255, 255, 255, .84);
             line-height: 1.7;
             font-family: 'Noto Sans Thai', sans-serif;
         }
 
         .card {
-            background: rgba(255, 255, 255, .92);
-            border: 1px solid var(--border);
-            border-radius: 28px;
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, .8);
+            border-radius: 30px;
             padding: 18px;
             box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
         }
 
         .card-title {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 800;
-            color: #145337;
+            color: #173b2a;
             margin-bottom: 16px;
+            letter-spacing: -.02em;
         }
 
         .card-title-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #dcfce8, #c7f7d8);
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: var(--primary-soft);
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            box-shadow: 0 10px 24px rgba(15, 107, 69, .08);
+        }
+
+        .card-title-icon svg {
+            width: 24px;
+            height: 24px;
         }
 
         .profile-avatar-wrap {
@@ -120,29 +158,33 @@
         }
 
         .profile-avatar {
-            width: 128px;
-            height: 128px;
-            border-radius: 50%;
+            width: 132px;
+            height: 132px;
+            border-radius: 36px;
             object-fit: cover;
-            border: 5px solid #edf8f1;
+            border: 5px solid rgba(255, 255, 255, .9);
             background: #fff;
             display: none;
-            box-shadow: var(--shadow-soft);
+            box-shadow: 0 14px 34px rgba(15, 107, 69, .18);
         }
 
         .profile-avatar-placeholder {
-            width: 128px;
-            height: 128px;
-            border-radius: 50%;
+            width: 132px;
+            height: 132px;
+            border-radius: 36px;
             margin: 0 auto;
-            border: 5px solid #edf8f1;
-            background: linear-gradient(135deg, #14965c, #29c979);
+            border: 5px solid rgba(255, 255, 255, .9);
+            background: linear-gradient(135deg, #0f6b45, #19a96b);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
             color: #fff;
-            box-shadow: var(--shadow-soft);
+            box-shadow: 0 14px 34px rgba(15, 107, 69, .18);
+        }
+
+        .profile-avatar-placeholder svg {
+            width: 58px;
+            height: 58px;
         }
 
         .btn-row {
@@ -156,30 +198,40 @@
 
         .btn {
             border: none;
-            border-radius: 18px;
+            border-radius: 20px;
             padding: 14px 18px;
             font-size: 14px;
             font-weight: 800;
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
             cursor: pointer;
-            box-shadow: var(--shadow-soft);
         }
 
         .btn-green {
-            background: linear-gradient(135deg, #14965c, #29c979);
+            background: linear-gradient(135deg, #0f6b45, #19a96b);
             color: #fff;
+            box-shadow: 0 14px 28px rgba(15, 107, 69, .22);
         }
 
         .btn-red {
-            background: linear-gradient(135deg, #ff586c, #ff6f57);
+            background: linear-gradient(135deg, #c0394f, #ff7b5f);
             color: #fff;
+            box-shadow: 0 14px 28px rgba(192, 57, 79, .18);
         }
 
         .btn-save {
             width: 100%;
             margin-top: 6px;
-            background: linear-gradient(135deg, #14965c, #29c979);
+            background: linear-gradient(135deg, #0f6b45, #19a96b);
             color: #fff;
+            box-shadow: 0 14px 28px rgba(15, 107, 69, .22);
+        }
+
+        .btn-logout {
+            width: 100%;
+            margin-top: 12px;
+            background: linear-gradient(135deg, #c0394f, #ff7b5f);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(192, 57, 79, .18);
         }
 
         .form-group {
@@ -190,33 +242,42 @@
             display: block;
             font-size: 14px;
             font-weight: 800;
-            color: #145337;
+            color: #173b2a;
             margin-bottom: 8px;
             font-family: 'Noto Sans Thai', sans-serif;
         }
 
         .form-input {
             width: 100%;
-            border: 1.5px solid #d9efe2;
-            border-radius: 18px;
-            padding: 14px 16px;
+            border: 1.5px solid var(--line);
+            border-radius: 20px;
+            padding: 15px 16px;
             font-size: 15px;
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
             outline: none;
-            background: #fff;
+            background: rgba(255, 255, 255, .86);
         }
 
         .form-input:focus {
-            border-color: #29c979;
-            box-shadow: 0 0 0 4px rgba(41, 201, 121, .10);
+            border-color: var(--primary-2);
+            box-shadow: 0 0 0 5px rgba(25, 169, 107, .12);
+        }
+
+        .form-input[readonly] {
+            background: #f4f8f6;
+            color: #65756d;
         }
 
         .hint {
-            margin-top: 10px;
+            margin-top: 12px;
+            padding: 13px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .65);
             font-size: 12px;
             color: var(--muted);
             line-height: 1.8;
             font-family: 'Noto Sans Thai', sans-serif;
+            font-weight: 600;
         }
 
         .floating-nav {
@@ -224,33 +285,33 @@
             left: 50%;
             bottom: 14px;
             transform: translateX(-50%);
-            width: min(470px, calc(100% - 18px));
-            background: rgba(255, 255, 255, .86);
-            border: 1px solid rgba(226, 240, 231, .95);
-            box-shadow: 0 16px 40px rgba(15, 35, 24, .12);
-            border-radius: 30px;
+            width: min(490px, calc(100% - 18px));
+            background: rgba(255, 255, 255, .82);
+            border: 1px solid rgba(255, 255, 255, .86);
+            box-shadow: 0 18px 45px rgba(18, 37, 27, .14);
+            border-radius: 32px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
             z-index: 999;
         }
 
         .floating-nav a {
             text-decoration: none;
-            color: #1f533b;
+            color: #21503b;
             text-align: center;
-            padding: 9px 4px;
-            border-radius: 20px;
+            padding: 10px 4px;
+            border-radius: 23px;
             font-size: 12px;
             font-weight: 800;
             line-height: 1.35;
         }
 
         .floating-nav a.active {
-            background: linear-gradient(135deg, #14965c, #29c979);
+            background: linear-gradient(135deg, #0f6b45, #19a96b);
             color: #fff;
-            box-shadow: 0 10px 24px rgba(33, 182, 111, .26);
+            box-shadow: 0 12px 28px rgba(15, 107, 69, .22);
         }
 
         .nav-ico {
@@ -262,25 +323,47 @@
 </head>
 
 <body>
+    <script>
+        requireLogin();
+    </script>
+
     <div class="app">
-        <div class="top-header">
-            <div class="top-avatar">🐄</div>
-            <h1>Profile & Settings</h1>
-            <p>ข้อมูลของแต่ละเครื่องจะถูกบันทึกแยกกันอัตโนมัติ</p>
+        <div class="top-card">
+            <div class="top-avatar">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" />
+                    <path d="M4 21c1.6-4.2 4.6-6 8-6s6.4 1.8 8 6" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" />
+                </svg>
+            </div>
+            <h1>Profile</h1>
+            <p>จัดการข้อมูลผู้ใช้ รูปโปรไฟล์ และชื่อฟาร์มของคุณ</p>
         </div>
 
         <div class="card">
             <div class="card-title">
-                <div class="card-title-icon">🌿</div>
+                <div class="card-title-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" />
+                        <path d="M4 21c1.6-4.2 4.6-6 8-6s6.4 1.8 8 6" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
                 <div>ข้อมูลโปรไฟล์</div>
             </div>
 
             <div class="profile-avatar-wrap">
                 <img id="profileAvatar" class="profile-avatar" alt="Profile Avatar">
-                <div id="profileAvatarPlaceholder" class="profile-avatar-placeholder">🐄</div>
+                <div id="profileAvatarPlaceholder" class="profile-avatar-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" />
+                        <path d="M4 21c1.6-4.2 4.6-6 8-6s6.4 1.8 8 6" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
 
                 <div class="btn-row">
-                    <button class="btn btn-green" id="uploadAvatarBtn" type="button">อัปโหลดรูปโปรไฟล์</button>
+                    <button class="btn btn-green" id="uploadAvatarBtn" type="button">อัปโหลดรูป</button>
                     <button class="btn btn-red" id="deleteAvatarBtn" type="button">ลบรูป</button>
                 </div>
 
@@ -289,7 +372,7 @@
 
             <div class="form-group">
                 <label class="form-label" for="usernameInput">ชื่อผู้ใช้</label>
-                <input class="form-input" id="usernameInput" type="text" placeholder="กรอกชื่อผู้ใช้">
+                <input class="form-input" id="usernameInput" type="text" placeholder="ชื่อผู้ใช้" readonly>
             </div>
 
             <div class="form-group">
@@ -298,23 +381,21 @@
             </div>
 
             <button class="btn btn-save" id="saveProfileBtn" type="button">บันทึกข้อมูลโปรไฟล์</button>
+            <button class="btn btn-logout" id="logoutBtn" type="button">ออกจากระบบ</button>
 
             <div class="hint">
-                หน้านี้บันทึกข้อมูลลงในเครื่องของผู้ใช้โดยตรง ดังนั้นแต่ละมือถือหรือแต่ละเบราว์เซอร์จะมีข้อมูลของตัวเอง
+                ข้อมูลโปรไฟล์จะบันทึกแยกตามบัญชีผู้ใช้ในเครื่องนี้ หากเปลี่ยนเครื่องหรือเบราว์เซอร์อาจต้องลงทะเบียนใหม่
             </div>
         </div>
     </div>
 
     <nav class="floating-nav">
-        <a href="index.html"><span class="nav-ico">🐄</span>Scan</a>
-        <a href="history.html"><span class="nav-ico">🕘</span>History</a>
-        <a href="profile.html" class="active"><span class="nav-ico">🌿</span>Profile</a>
+        <a href="scan.html"><span class="nav-ico">⌁</span>Scan</a>
+        <a href="history.html"><span class="nav-ico">◷</span>History</a>
+        <a href="profile.html" class="active"><span class="nav-ico">◎</span>Profile</a>
     </nav>
 
     <script>
-        const PROFILE_KEY = "cow_profile_device";
-        const AVATAR_KEY = "cow_profile_avatar_device";
-
         const profileAvatar = document.getElementById("profileAvatar");
         const profileAvatarPlaceholder = document.getElementById("profileAvatarPlaceholder");
         const avatarInput = document.getElementById("avatarInput");
@@ -323,59 +404,9 @@
         const uploadAvatarBtn = document.getElementById("uploadAvatarBtn");
         const deleteAvatarBtn = document.getElementById("deleteAvatarBtn");
         const saveProfileBtn = document.getElementById("saveProfileBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
 
         let currentAvatarUrl = "";
-
-        function getLocalProfile() {
-            try {
-                const raw = localStorage.getItem(PROFILE_KEY);
-                if (!raw) return null;
-                const parsed = JSON.parse(raw);
-                return parsed && typeof parsed === "object" ? parsed : null;
-            } catch (error) {
-                console.error("อ่าน local profile ไม่สำเร็จ:", error);
-                return null;
-            }
-        }
-
-        function saveLocalProfile(profile) {
-            try {
-                localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-                return true;
-            } catch (error) {
-                console.error("บันทึก local profile ไม่สำเร็จ:", error);
-                return false;
-            }
-        }
-
-        function getLocalAvatar() {
-            try {
-                return localStorage.getItem(AVATAR_KEY) || "";
-            } catch (error) {
-                console.error("อ่าน avatar ไม่สำเร็จ:", error);
-                return "";
-            }
-        }
-
-        function saveLocalAvatar(dataUrl) {
-            try {
-                localStorage.setItem(AVATAR_KEY, dataUrl);
-                return true;
-            } catch (error) {
-                console.error("บันทึก avatar ไม่สำเร็จ:", error);
-                return false;
-            }
-        }
-
-        function removeLocalAvatar() {
-            try {
-                localStorage.removeItem(AVATAR_KEY);
-                return true;
-            } catch (error) {
-                console.error("ลบ avatar ไม่สำเร็จ:", error);
-                return false;
-            }
-        }
 
         function showAvatar(url) {
             if (url) {
@@ -389,7 +420,7 @@
             }
         }
 
-        function resizeImage(file, maxSize = 256, quality = 0.72) {
+        function resizeImage(file, maxSize = 320, quality = 0.78) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
 
@@ -419,8 +450,7 @@
                         const ctx = canvas.getContext("2d");
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-                        resolve(compressedDataUrl);
+                        resolve(canvas.toDataURL("image/jpeg", quality));
                     };
 
                     img.onerror = () => reject(new Error("โหลดรูปไม่สำเร็จ"));
@@ -433,18 +463,13 @@
         }
 
         function loadProfilePage() {
-            const localProfile = getLocalProfile();
-            const avatar = getLocalAvatar();
+            const session = getCurrentUser();
+            const profile = getProfile();
 
-            if (localProfile) {
-                usernameInput.value = localProfile.username || "";
-                farmInput.value = localProfile.farmName || "";
-            } else {
-                usernameInput.value = "";
-                farmInput.value = "";
-            }
+            usernameInput.value = profile?.username || session?.username || "";
+            farmInput.value = profile?.farmName || "";
+            currentAvatarUrl = profile?.avatar || "";
 
-            currentAvatarUrl = avatar || "";
             showAvatar(currentAvatarUrl);
         }
 
@@ -457,19 +482,11 @@
             if (!file) return;
 
             try {
-                const smallImageUrl = await resizeImage(file, 256, 0.72);
-                currentAvatarUrl = smallImageUrl;
+                currentAvatarUrl = await resizeImage(file, 320, 0.78);
                 showAvatar(currentAvatarUrl);
-
-                const avatarSaved = saveLocalAvatar(currentAvatarUrl);
-
-                if (avatarSaved) {
-                    alert("อัปโหลดรูปโปรไฟล์สำเร็จ");
-                } else {
-                    alert("อัปโหลดรูปไม่สำเร็จ: รูปอาจมีขนาดใหญ่เกินไปสำหรับเบราว์เซอร์นี้");
-                }
+                alert("อัปโหลดรูปโปรไฟล์สำเร็จ");
             } catch (error) {
-                console.error("อัปโหลดรูปไม่สำเร็จ:", error);
+                console.error(error);
                 alert("อัปโหลดรูปไม่สำเร็จ");
             } finally {
                 avatarInput.value = "";
@@ -479,19 +496,22 @@
         deleteAvatarBtn.addEventListener("click", () => {
             currentAvatarUrl = "";
             showAvatar("");
-
-            const avatarRemoved = removeLocalAvatar();
-            alert(avatarRemoved ? "ลบรูปโปรไฟล์แล้ว" : "ลบรูปไม่สำเร็จ");
+            alert("ลบรูปโปรไฟล์แล้ว");
         });
 
         saveProfileBtn.addEventListener("click", () => {
-            const payload = {
-                username: usernameInput.value.trim(),
-                farmName: farmInput.value.trim()
-            };
+            const saved = saveProfile({
+                farmName: farmInput.value.trim(),
+                avatar: currentAvatarUrl
+            });
 
-            const localSaved = saveLocalProfile(payload);
-            alert(localSaved ? "บันทึกข้อมูลโปรไฟล์สำเร็จ" : "บันทึกข้อมูลไม่สำเร็จ");
+            alert(saved ? "บันทึกข้อมูลโปรไฟล์สำเร็จ" : "บันทึกข้อมูลไม่สำเร็จ");
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            const ok = confirm("ต้องการออกจากระบบใช่หรือไม่");
+            if (!ok) return;
+            logout();
         });
 
         loadProfilePage();
