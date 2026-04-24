@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการชุดข้อมูลฝึกโมเดล</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./app.css">
+    <script src="./auth.js"></script>
+</head>
+
+<body>
+    <script>requireAdmin();</script>
+
+    <main class="page">
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">🧠</div>
+                <div>
+                    <h1>Dataset<br>Manager</h1>
+                    <p>จัดการชุดข้อมูล Training, Validation และ Test Set</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>เพิ่มชุดข้อมูล</h2>
+                <span class="pill">Dataset</span>
+            </div>
+
+            <div class="form-group">
+                <label>ชื่อชุดข้อมูล</label>
+                <input id="datasetName" type="text" placeholder="เช่น class_1_original">
+            </div>
+
+            <div class="form-group">
+                <label>ประเภทชุดข้อมูล</label>
+                <select id="datasetType" class="form-input">
+                    <option value="Training Set">Training Set</option>
+                    <option value="Validation Set">Validation Set</option>
+                    <option value="Test Set">Test Set</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>จำนวนภาพ</label>
+                <input id="imageCount" type="number" min="1" placeholder="เช่น 120">
+            </div>
+
+            <button class="btn btn-green" onclick="saveDataset()">บันทึกชุดข้อมูล</button>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label>ค้นหาชุดข้อมูล</label>
+                <input id="searchInput" type="text" placeholder="ค้นหาชื่อชุดข้อมูล" oninput="renderList()">
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>รายการชุดข้อมูล</h2>
+                <span class="pill" id="count">0 รายการ</span>
+            </div>
+            <div id="list"></div>
+        </section>
+
+        <div class="button-row">
+            <a href="admin.html" class="btn btn-light">กลับหน้า Admin</a>
+            <button class="btn btn-red" onclick="logout()">ออกจากระบบ</button>
+        </div>
+    </main>
+
+    <script>
+        const KEY = "admin_dataset";
+
+        function getData() {
+            return JSON.parse(localStorage.getItem(KEY) || "[]");
+        }
+
+        function setData(data) {
+            localStorage.setItem(KEY, JSON.stringify(data));
+        }
+
+        function saveDataset() {
+            const name = datasetName.value.trim();
+            const type = datasetType.value;
+            const countImg = imageCount.value.trim();
+
+            if (!name || !countImg) {
+                alert("กรุณากรอกชื่อชุดข้อมูลและจำนวนภาพ");
+                return;
+            }
+
+            const data = getData();
+            data.unshift({
+                name,
+                type,
+                countImg,
+                createdAt: new Date().toLocaleString("th-TH")
+            });
+
+            setData(data);
+            datasetName.value = "";
+            imageCount.value = "";
+            renderList();
+            alert("บันทึกชุดข้อมูลสำเร็จ");
+        }
+
+        function deleteItem(index) {
+            if (!confirm("ต้องการลบข้อมูลนี้ใช่หรือไม่")) return;
+            const data = getData();
+            data.splice(index, 1);
+            setData(data);
+            renderList();
+        }
+
+        function renderList() {
+            const keyword = searchInput.value.toLowerCase();
+            const data = getData();
+            const filtered = data.filter(item => item.name.toLowerCase().includes(keyword));
+
+            count.textContent = filtered.length + " รายการ";
+
+            if (!filtered.length) {
+                list.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูลชุดข้อมูล</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map((item, index) => `
+        <div class="history-item">
+            <div class="history-content">
+                <h3>${item.name}</h3>
+                <p><strong>ประเภท:</strong> ${item.type}</p>
+                <p><strong>จำนวนภาพ:</strong> ${item.countImg} ภาพ</p>
+                <p><strong>เวลา:</strong> ${item.createdAt}</p>
+                <button class="btn btn-red" onclick="deleteItem(${index})">ลบ</button>
+            </div>
+        </div>
+    `).join("");
+        }
+
+        renderList();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Charolais AI Scan</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="./app.css">
+    <script src="./auth.js"></script>
+</head>
+
+<body>
+    <script>requireAdmin();</script>
+
+    <main class="page">
+
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">🛠️</div>
+                <div>
+                    <h1>Admin<br>Dashboard</h1>
+                    <p>ระบบจัดการข้อมูลหลังบ้านของเว็บแอปพลิเคชัน</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>เมนูจัดการหลังบ้าน</h2>
+                <span class="pill">Admin</span>
+            </div>
+
+            <div class="admin-grid">
+
+                <a class="admin-box admin-link" href="admin-images.html">
+                    <div class="admin-icon">🖼️</div>
+                    <h3>จัดการภาพถ่ายใบหน้าโค</h3>
+                    <p>ค้นหา เพิ่ม ลบ แก้ไข ข้อมูลภาพถ่าย</p>
+                </a>
+
+                <a class="admin-box admin-link" href="admin-cows.html">
+                    <div class="admin-icon">🐄</div>
+                    <h3>จัดการข้อมูลโค</h3>
+                    <p>รหัสโค อายุ เพศ และข้อมูลพื้นฐาน</p>
+                </a>
+
+                <a class="admin-box admin-link" href="admin-scores.html">
+                    <div class="admin-icon">⭐</div>
+                    <h3>จัดการคะแนนผู้เชี่ยวชาญ</h3>
+                    <p>คะแนนประเมินความสวยงามใบหน้าโค</p>
+                </a>
+
+                <a class="admin-box admin-link" href="admin-dataset.html">
+                    <div class="admin-icon">🧠</div>
+                    <h3>จัดการชุดข้อมูลฝึกโมเดล</h3>
+                    <p>Training, Validation และ Test Set</p>
+                </a>
+
+                <a class="admin-box admin-link" href="admin-reports.html">
+                    <div class="admin-icon">📊</div>
+                    <h3>รายงานการใช้งานระบบ</h3>
+                    <p>ดูการเข้าสู่ระบบและการใช้งานของ User</p>
+                </a>
+
+            </div>
+
+            <div class="button-row">
+                <a href="scan.html" class="btn btn-light">ไปหน้า User</a>
+                <button class="btn btn-red" type="button" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+</html>

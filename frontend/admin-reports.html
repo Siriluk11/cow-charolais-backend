@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานการใช้งานระบบ - Charolais AI Scan</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="./app.css">
+    <script src="./auth.js"></script>
+</head>
+
+<body>
+    <script>requireAdmin();</script>
+
+    <main class="page">
+
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">📊</div>
+                <div>
+                    <h1>Usage<br>Reports</h1>
+                    <p>รายงานการเข้าสู่ระบบและการใช้งานของผู้ใช้ในเว็บแอปพลิเคชัน</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>สรุปการใช้งาน</h2>
+                <span class="pill" id="totalCount">0 รายการ</span>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-box">
+                    <div class="label">จำนวน Login</div>
+                    <div class="value" id="loginCount">0</div>
+                </div>
+
+                <div class="result-box">
+                    <div class="label">จำนวน Scan</div>
+                    <div class="value" id="scanCount">0</div>
+                </div>
+
+                <div class="result-box">
+                    <div class="label">ผู้ใช้งานล่าสุด</div>
+                    <div class="value" id="lastUser">-</div>
+                </div>
+
+                <div class="result-box">
+                    <div class="label">เวลาล่าสุด</div>
+                    <div class="value" id="lastTime">-</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>ประวัติการใช้งาน</h2>
+                <span class="pill">Logs</span>
+            </div>
+
+            <div class="button-row">
+                <button class="btn btn-light" type="button" onclick="addTestLog()">เพิ่มข้อมูลทดสอบ</button>
+                <button class="btn btn-red" type="button" onclick="clearLogs()">ล้างรายงาน</button>
+            </div>
+
+            <div id="reportList"></div>
+        </section>
+
+        <div class="button-row">
+            <a href="admin.html" class="btn btn-light">กลับหน้า Admin</a>
+            <button class="btn btn-red" type="button" onclick="logout()">ออกจากระบบ</button>
+        </div>
+
+    </main>
+
+    <script>
+        const LOG_KEY = "charolais_activity_logs";
+        const HISTORY_KEY = "cow_scan_history";
+
+        function getLogs() {
+            try {
+                return JSON.parse(localStorage.getItem(LOG_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveLogs(logs) {
+            localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+        }
+
+        function getScanHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function addLog(action, detail) {
+            const session = getCurrentUser();
+            const logs = getLogs();
+
+            logs.unshift({
+                username: session?.username || "unknown",
+                role: session?.role || "unknown",
+                action: action,
+                detail: detail,
+                createdAt: new Date().toLocaleString("th-TH")
+            });
+
+            saveLogs(logs.slice(0, 200));
+            renderReports();
+        }
+
+        function addTestLog() {
+            addLog("ทดสอบรายงาน", "เพิ่มข้อมูลทดสอบในหน้ารายงานการใช้งานระบบ");
+        }
+
+        function clearLogs() {
+            const ok = confirm("ต้องการล้างรายงานการใช้งานทั้งหมดใช่หรือไม่");
+            if (!ok) return;
+
+            localStorage.removeItem(LOG_KEY);
+            renderReports();
+        }
+
+        function renderReports() {
+            const logs = getLogs();
+            const scanHistory = getScanHistory();
+
+            const loginLogs = logs.filter(item => String(item.action || "").includes("เข้าสู่ระบบ"));
+            const scanLogs = logs.filter(item => String(item.action || "").includes("สแกน"));
+
+            const total = logs.length + scanHistory.length;
+
+            totalCount.textContent = total + " รายการ";
+            loginCount.textContent = loginLogs.length;
+            scanCount.textContent = scanLogs.length + scanHistory.length;
+
+            if (logs.length) {
+                lastUser.textContent = logs[0].username || "-";
+                lastTime.textContent = logs[0].createdAt || "-";
+            } else {
+                lastUser.textContent = "-";
+                lastTime.textContent = "-";
+            }
+
+            const allReports = [
+                ...logs.map(item => ({
+                    type: "Log",
+                    username: item.username || "-",
+                    action: item.action || "-",
+                    detail: item.detail || "-",
+                    createdAt: item.createdAt || "-"
+                })),
+                ...scanHistory.map(item => ({
+                    type: "Scan",
+                    username: "user",
+                    action: "สแกนภาพใบหน้าโค",
+                    detail: `ผลลัพธ์: ${item.predictedClass || "-"} | ดาว: ${item.star || "-"} | ความมั่นใจ: ${item.confidence || "-"}`,
+                    createdAt: item.createdAt || "-"
+                }))
+            ];
+
+            if (!allReports.length) {
+                reportList.innerHTML = `
+                    <div class="empty-state">
+                        ยังไม่มีรายงานการใช้งานระบบ
+                    </div>
+                `;
+                return;
+            }
+
+            reportList.innerHTML = allReports.map(item => `
+                <div class="history-item">
+                    <div class="history-content">
+                        <h3>${item.action}</h3>
+                        <p><strong>ผู้ใช้:</strong> ${item.username}</p>
+                        <p><strong>ประเภท:</strong> ${item.type}</p>
+                        <p><strong>รายละเอียด:</strong> ${item.detail}</p>
+                        <p><strong>เวลา:</strong> ${item.createdAt}</p>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        addLog("เข้าหน้ารายงาน", "ผู้ดูแลระบบเปิดหน้ารายงานการใช้งาน");
+        renderReports();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการข้อมูลโค</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./app.css">
+    <script src="./auth.js"></script>
+</head>
+
+<body>
+    <script>requireAdmin();</script>
+
+    <main class="page">
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">🐄</div>
+                <div>
+                    <h1>จัดการ<br>ข้อมูลโค</h1>
+                    <p>บันทึกรหัสโค อายุ เพศ และข้อมูลพื้นฐาน</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>เพิ่มข้อมูลโค</h2>
+                <span class="pill">Cows</span>
+            </div>
+
+            <div class="form-group">
+                <label>รหัสโค</label>
+                <input id="cowCode" type="text" placeholder="เช่น COW-001">
+            </div>
+
+            <div class="form-group">
+                <label>อายุ</label>
+                <input id="cowAge" type="text" placeholder="เช่น 2 ปี">
+            </div>
+
+            <div class="form-group">
+                <label>เพศ</label>
+                <input id="cowGender" type="text" placeholder="เพศผู้ / เพศเมีย">
+            </div>
+
+            <div class="form-group">
+                <label>ข้อมูลพื้นฐาน</label>
+                <input id="cowDetail" type="text" placeholder="รายละเอียดเพิ่มเติม">
+            </div>
+
+            <button class="btn btn-green" onclick="saveCow()">บันทึกข้อมูลโค</button>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label>ค้นหาข้อมูลโค</label>
+                <input id="searchInput" type="text" placeholder="ค้นหารหัสโค" oninput="renderList()">
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>รายการข้อมูลโค</h2>
+                <span class="pill" id="count">0 รายการ</span>
+            </div>
+            <div id="list"></div>
+        </section>
+
+        <div class="button-row">
+            <a href="admin.html" class="btn btn-light">กลับหน้า Admin</a>
+            <button class="btn btn-red" onclick="logout()">ออกจากระบบ</button>
+        </div>
+    </main>
+
+    <script>
+        const KEY = "admin_cows";
+
+        function getData() {
+            return JSON.parse(localStorage.getItem(KEY) || "[]");
+        }
+
+        function setData(data) {
+            localStorage.setItem(KEY, JSON.stringify(data));
+        }
+
+        function saveCow() {
+            const code = cowCode.value.trim();
+            const age = cowAge.value.trim();
+            const gender = cowGender.value.trim();
+            const detail = cowDetail.value.trim();
+
+            if (!code || !age || !gender) {
+                alert("กรุณากรอกรหัสโค อายุ และเพศ");
+                return;
+            }
+
+            const data = getData();
+            data.unshift({
+                code,
+                age,
+                gender,
+                detail,
+                createdAt: new Date().toLocaleString("th-TH")
+            });
+
+            setData(data);
+            cowCode.value = "";
+            cowAge.value = "";
+            cowGender.value = "";
+            cowDetail.value = "";
+            renderList();
+            alert("บันทึกข้อมูลโคสำเร็จ");
+        }
+
+        function deleteItem(index) {
+            if (!confirm("ต้องการลบข้อมูลนี้ใช่หรือไม่")) return;
+            const data = getData();
+            data.splice(index, 1);
+            setData(data);
+            renderList();
+        }
+
+        function renderList() {
+            const keyword = searchInput.value.toLowerCase();
+            const data = getData();
+            const filtered = data.filter(item => item.code.toLowerCase().includes(keyword));
+
+            count.textContent = filtered.length + " รายการ";
+
+            if (!filtered.length) {
+                list.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูลโค</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map((item, index) => `
+        <div class="history-item">
+            <div class="history-content">
+                <h3>${item.code}</h3>
+                <p><strong>อายุ:</strong> ${item.age}</p>
+                <p><strong>เพศ:</strong> ${item.gender}</p>
+                <p><strong>ข้อมูลพื้นฐาน:</strong> ${item.detail || "-"}</p>
+                <p><strong>เวลา:</strong> ${item.createdAt}</p>
+                <button class="btn btn-red" onclick="deleteItem(${index})">ลบ</button>
+            </div>
+        </div>
+    `).join("");
+        }
+
+        renderList();
+    </script>
+</body>
+
+</html>

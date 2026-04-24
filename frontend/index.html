@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Charolais AI Scan</title>
-
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
         rel="stylesheet">
@@ -16,20 +15,14 @@
 <body>
     <div class="auth-page">
         <div class="auth-card">
-            <div class="brand-mark cow-mark">
-                <span>🐮</span>
-            </div>
+            <div class="brand-mark cow-mark"><span>🐮</span></div>
 
-            <h1 style="text-align:center;">เข้าสู่ระบบ</h1>
-
-            <div class="subtitle">
-                Charolais AI Scan<br>
-                ระบบวิเคราะห์ความสวยงามใบหน้าโคพันธุ์ชาโรเล่ส์
-            </div>
+            <h1 style="text-align:center;">Charolais<br>AI Scan</h1>
+            <div class="subtitle">ระบบวิเคราะห์ความสวยงามใบหน้าโคพันธุ์ชาโรเล่ส์</div>
 
             <div class="form-group">
                 <label for="username">ชื่อผู้ใช้</label>
-                <input id="username" type="text" placeholder="ชื่อผู้ใช้ภาษาไทยหรืออังกฤษ">
+                <input id="username" type="text" placeholder="ผู้ใช้ทั่วไป หรือ admin">
             </div>
 
             <div class="form-group">
@@ -37,19 +30,17 @@
                 <input id="password" type="password" placeholder="กรอกรหัสผ่าน">
             </div>
 
-            <button class="btn btn-main" id="loginBtn" type="button">
-                เข้าสู่ระบบ
-            </button>
-
-            <div class="link-row">
-                <a href="register.html">ลงทะเบียน</a>
-                <a href="forgot.html">ลืมรหัสผ่าน?</a>
-            </div>
+            <button class="btn btn-main" id="loginBtn" type="button">เข้าสู่ระบบ</button>
 
             <div class="message" id="message"></div>
 
+            <div class="link-row">
+                <a href="forgot.html">ลืมรหัสผ่าน?</a>
+                <a href="register.html">ลงทะเบียน</a>
+            </div>
+
             <div class="note">
-                ระบบจะบันทึกบัญชีผู้ใช้และโปรไฟล์แยกตามชื่อผู้ใช้ พร้อมเข้ารหัสรหัสผ่านก่อนจัดเก็บในเครื่อง
+                ผู้ใช้งานทั่วไปเข้าสู่หน้า Scan ส่วนผู้ดูแลระบบเข้าสู่หน้าจัดการหลังบ้าน
             </div>
         </div>
     </div>
@@ -67,7 +58,10 @@
         }
 
         loginBtn.addEventListener("click", async () => {
-            const result = await loginUser(usernameInput.value, passwordInput.value);
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            const result = await loginUser(username, password);
 
             if (!result.ok) {
                 showMessage(result.message, "error");
@@ -77,8 +71,12 @@
             showMessage(result.message, "success");
 
             setTimeout(() => {
-                window.location.href = "scan.html";
-            }, 500);
+                if (result.role === "admin") {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "scan.html";
+                }
+            }, 700);
         });
     </script>
 </body>

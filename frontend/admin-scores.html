@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการคะแนนผู้เชี่ยวชาญ</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./app.css">
+    <script src="./auth.js"></script>
+</head>
+
+<body>
+    <script>requireAdmin();</script>
+
+    <main class="page">
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">⭐</div>
+                <div>
+                    <h1>คะแนน<br>ผู้เชี่ยวชาญ</h1>
+                    <p>บันทึกคะแนนประเมินความสวยงามใบหน้าโค</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>เพิ่มคะแนน</h2>
+                <span class="pill">Scores</span>
+            </div>
+
+            <div class="form-group">
+                <label>รหัสโค / รหัสภาพ</label>
+                <input id="refCode" type="text" placeholder="เช่น COW-001 หรือ IMG-001">
+            </div>
+
+            <div class="form-group">
+                <label>ชื่อผู้เชี่ยวชาญ</label>
+                <input id="expertName" type="text" placeholder="ชื่อผู้ประเมิน">
+            </div>
+
+            <div class="form-group">
+                <label>คะแนน 1-5</label>
+                <input id="scoreValue" type="number" min="1" max="5" placeholder="1-5">
+            </div>
+
+            <button class="btn btn-green" onclick="saveScore()">บันทึกคะแนน</button>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label>ค้นหาคะแนน</label>
+                <input id="searchInput" type="text" placeholder="ค้นหารหัสโค / ผู้เชี่ยวชาญ" oninput="renderList()">
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>รายการคะแนน</h2>
+                <span class="pill" id="count">0 รายการ</span>
+            </div>
+            <div id="list"></div>
+        </section>
+
+        <div class="button-row">
+            <a href="admin.html" class="btn btn-light">กลับหน้า Admin</a>
+            <button class="btn btn-red" onclick="logout()">ออกจากระบบ</button>
+        </div>
+    </main>
+
+    <script>
+        const KEY = "admin_scores";
+
+        function getData() {
+            return JSON.parse(localStorage.getItem(KEY) || "[]");
+        }
+
+        function setData(data) {
+            localStorage.setItem(KEY, JSON.stringify(data));
+        }
+
+        function saveScore() {
+            const ref = refCode.value.trim();
+            const expert = expertName.value.trim();
+            const score = Number(scoreValue.value);
+
+            if (!ref || !expert || score < 1 || score > 5) {
+                alert("กรุณากรอกข้อมูลให้ครบ และคะแนนต้องอยู่ระหว่าง 1-5");
+                return;
+            }
+
+            const data = getData();
+            data.unshift({
+                ref,
+                expert,
+                score,
+                createdAt: new Date().toLocaleString("th-TH")
+            });
+
+            setData(data);
+            refCode.value = "";
+            expertName.value = "";
+            scoreValue.value = "";
+            renderList();
+            alert("บันทึกคะแนนสำเร็จ");
+        }
+
+        function deleteItem(index) {
+            if (!confirm("ต้องการลบข้อมูลนี้ใช่หรือไม่")) return;
+            const data = getData();
+            data.splice(index, 1);
+            setData(data);
+            renderList();
+        }
+
+        function stars(n) {
+            return "★".repeat(n) + "☆".repeat(5 - n);
+        }
+
+        function renderList() {
+            const keyword = searchInput.value.toLowerCase();
+            const data = getData();
+            const filtered = data.filter(item =>
+                item.ref.toLowerCase().includes(keyword) ||
+                item.expert.toLowerCase().includes(keyword)
+            );
+
+            count.textContent = filtered.length + " รายการ";
+
+            if (!filtered.length) {
+                list.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูลคะแนน</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map((item, index) => `
+        <div class="history-item">
+            <div class="history-content">
+                <h3>${item.ref}</h3>
+                <p><strong>ผู้เชี่ยวชาญ:</strong> ${item.expert}</p>
+                <p><strong>คะแนน:</strong> ${item.score} ดาว ${stars(item.score)}</p>
+                <p><strong>เวลา:</strong> ${item.createdAt}</p>
+                <button class="btn btn-red" onclick="deleteItem(${index})">ลบ</button>
+            </div>
+        </div>
+    `).join("");
+        }
+
+        renderList();
+    </script>
+</body>
+
+</html>

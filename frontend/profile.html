@@ -2,277 +2,36 @@
 <html lang="th">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Charolais AI Scan</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap"
         rel="stylesheet">
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #f6fbf7;
-            --bg2: #edf7f0;
-            --surface: #ffffff;
-            --text: #173126;
-            --muted: #6b7d73;
-            --green: #21b66f;
-            --green-dark: #148552;
-            --green-soft: #eefbf3;
-            --border: #e3f1e8;
-            --red: #ff5b6e;
-            --shadow: 0 18px 45px rgba(20, 50, 35, .08);
-            --shadow-soft: 0 10px 24px rgba(33, 182, 111, .14);
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100dvh;
-            background:
-                radial-gradient(circle at top left, rgba(33, 182, 111, .10), transparent 25%),
-                linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
-            color: var(--text);
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
-        }
-
-        .app {
-            max-width: 500px;
-            margin: 0 auto;
-            min-height: 100dvh;
-            padding: 20px 14px 120px;
-        }
-
-        .top-header {
-            text-align: center;
-            margin-bottom: 18px;
-        }
-
-        .top-avatar {
-            width: 98px;
-            height: 98px;
-            margin: 0 auto 16px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #14965c, #29c979);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: #fff;
-            box-shadow: 0 18px 36px rgba(33, 182, 111, .24);
-        }
-
-        .top-header h1 {
-            margin: 0;
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: -.02em;
-        }
-
-        .top-header p {
-            margin: 8px 0 0;
-            font-size: 14px;
-            color: var(--muted);
-            line-height: 1.7;
-            font-family: 'Noto Sans Thai', sans-serif;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, .92);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 18px;
-            box-shadow: var(--shadow);
-        }
-
-        .card-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 20px;
-            font-weight: 800;
-            color: #145337;
-            margin-bottom: 16px;
-        }
-
-        .card-title-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #dcfce8, #c7f7d8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .profile-avatar-wrap {
-            text-align: center;
-            margin-bottom: 18px;
-        }
-
-        .profile-avatar {
-            width: 128px;
-            height: 128px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid #edf8f1;
-            background: #fff;
-            display: none;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .profile-avatar-placeholder {
-            width: 128px;
-            height: 128px;
-            border-radius: 50%;
-            margin: 0 auto;
-            border: 5px solid #edf8f1;
-            background: linear-gradient(135deg, #14965c, #29c979);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: #fff;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .btn-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 16px;
-            margin-bottom: 18px;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 18px;
-            padding: 14px 18px;
-            font-size: 14px;
-            font-weight: 800;
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
-            cursor: pointer;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .btn-green {
-            background: linear-gradient(135deg, #14965c, #29c979);
-            color: #fff;
-        }
-
-        .btn-red {
-            background: linear-gradient(135deg, #ff586c, #ff6f57);
-            color: #fff;
-        }
-
-        .btn-save {
-            width: 100%;
-            margin-top: 6px;
-            background: linear-gradient(135deg, #14965c, #29c979);
-            color: #fff;
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 800;
-            color: #145337;
-            margin-bottom: 8px;
-            font-family: 'Noto Sans Thai', sans-serif;
-        }
-
-        .form-input {
-            width: 100%;
-            border: 1.5px solid #d9efe2;
-            border-radius: 18px;
-            padding: 14px 16px;
-            font-size: 15px;
-            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
-            outline: none;
-            background: #fff;
-        }
-
-        .form-input:focus {
-            border-color: #29c979;
-            box-shadow: 0 0 0 4px rgba(41, 201, 121, .10);
-        }
-
-        .hint {
-            margin-top: 10px;
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.8;
-            font-family: 'Noto Sans Thai', sans-serif;
-        }
-
-        .floating-nav {
-            position: fixed;
-            left: 50%;
-            bottom: 14px;
-            transform: translateX(-50%);
-            width: min(470px, calc(100% - 18px));
-            background: rgba(255, 255, 255, .86);
-            border: 1px solid rgba(226, 240, 231, .95);
-            box-shadow: 0 16px 40px rgba(15, 35, 24, .12);
-            border-radius: 30px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
-            backdrop-filter: blur(16px);
-            z-index: 999;
-        }
-
-        .floating-nav a {
-            text-decoration: none;
-            color: #1f533b;
-            text-align: center;
-            padding: 9px 4px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
-            line-height: 1.35;
-        }
-
-        .floating-nav a.active {
-            background: linear-gradient(135deg, #14965c, #29c979);
-            color: #fff;
-            box-shadow: 0 10px 24px rgba(33, 182, 111, .26);
-        }
-
-        .nav-ico {
-            display: block;
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
-    </style>
+    <link rel="stylesheet" href="./app.css">
+    <script src="./auth.js"></script>
 </head>
 
 <body>
-    <div class="app">
-        <div class="top-header">
-            <div class="top-avatar">🐄</div>
-            <h1>Profile & Settings</h1>
-            <p>ข้อมูลของแต่ละเครื่องจะถูกบันทึกแยกกันอัตโนมัติ</p>
-        </div>
+    <script>requireLogin();</script>
 
-        <div class="card">
-            <div class="card-title">
-                <div class="card-title-icon">🌿</div>
-                <div>ข้อมูลโปรไฟล์</div>
+    <main class="page">
+        <section class="hero">
+            <div class="hero-row">
+                <div class="hero-icon">
+                    <span class="emoji-icon">🌿</span>
+                </div>
+                <div>
+                    <h1>Profile</h1>
+                    <p>จัดการข้อมูลผู้ใช้และข้อมูลฟาร์มของคุณ</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>ข้อมูลโปรไฟล์</h2>
+                <span class="pill">Settings</span>
             </div>
 
             <div class="profile-avatar-wrap">
@@ -280,7 +39,7 @@
                 <div id="profileAvatarPlaceholder" class="profile-avatar-placeholder">🐄</div>
 
                 <div class="btn-row">
-                    <button class="btn btn-green" id="uploadAvatarBtn" type="button">อัปโหลดรูปโปรไฟล์</button>
+                    <button class="btn btn-green" id="uploadAvatarBtn" type="button">อัปโหลดรูป</button>
                     <button class="btn btn-red" id="deleteAvatarBtn" type="button">ลบรูป</button>
                 </div>
 
@@ -289,7 +48,7 @@
 
             <div class="form-group">
                 <label class="form-label" for="usernameInput">ชื่อผู้ใช้</label>
-                <input class="form-input" id="usernameInput" type="text" placeholder="กรอกชื่อผู้ใช้">
+                <input class="form-input" id="usernameInput" type="text" readonly>
             </div>
 
             <div class="form-group">
@@ -299,22 +58,24 @@
 
             <button class="btn btn-save" id="saveProfileBtn" type="button">บันทึกข้อมูลโปรไฟล์</button>
 
-            <div class="hint">
-                หน้านี้บันทึกข้อมูลลงในเครื่องของผู้ใช้โดยตรง ดังนั้นแต่ละมือถือหรือแต่ละเบราว์เซอร์จะมีข้อมูลของตัวเอง
+            <div class="button-row">
+                <button class="btn btn-red" id="logoutBtn" type="button">ออกจากระบบ</button>
+                <a href="scan.html" class="btn btn-green">กลับไป Scan</a>
             </div>
-        </div>
-    </div>
+
+            <div class="hint">
+                ข้อมูลโปรไฟล์นี้บันทึกไว้ในเครื่องของผู้ใช้
+            </div>
+        </section>
+    </main>
 
     <nav class="floating-nav">
-        <a href="index.html"><span class="nav-ico">🐄</span>Scan</a>
-        <a href="history.html"><span class="nav-ico">🕘</span>History</a>
-        <a href="profile.html" class="active"><span class="nav-ico">🌿</span>Profile</a>
+        <a href="scan.html"><span class="nav-ico">✦</span>Scan</a>
+        <a href="history.html"><span class="nav-ico">◴</span>History</a>
+        <a href="profile.html" class="active"><span class="nav-ico">◉</span>Profile</a>
     </nav>
 
     <script>
-        const PROFILE_KEY = "cow_profile_device";
-        const AVATAR_KEY = "cow_profile_avatar_device";
-
         const profileAvatar = document.getElementById("profileAvatar");
         const profileAvatarPlaceholder = document.getElementById("profileAvatarPlaceholder");
         const avatarInput = document.getElementById("avatarInput");
@@ -323,59 +84,9 @@
         const uploadAvatarBtn = document.getElementById("uploadAvatarBtn");
         const deleteAvatarBtn = document.getElementById("deleteAvatarBtn");
         const saveProfileBtn = document.getElementById("saveProfileBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
 
         let currentAvatarUrl = "";
-
-        function getLocalProfile() {
-            try {
-                const raw = localStorage.getItem(PROFILE_KEY);
-                if (!raw) return null;
-                const parsed = JSON.parse(raw);
-                return parsed && typeof parsed === "object" ? parsed : null;
-            } catch (error) {
-                console.error("อ่าน local profile ไม่สำเร็จ:", error);
-                return null;
-            }
-        }
-
-        function saveLocalProfile(profile) {
-            try {
-                localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-                return true;
-            } catch (error) {
-                console.error("บันทึก local profile ไม่สำเร็จ:", error);
-                return false;
-            }
-        }
-
-        function getLocalAvatar() {
-            try {
-                return localStorage.getItem(AVATAR_KEY) || "";
-            } catch (error) {
-                console.error("อ่าน avatar ไม่สำเร็จ:", error);
-                return "";
-            }
-        }
-
-        function saveLocalAvatar(dataUrl) {
-            try {
-                localStorage.setItem(AVATAR_KEY, dataUrl);
-                return true;
-            } catch (error) {
-                console.error("บันทึก avatar ไม่สำเร็จ:", error);
-                return false;
-            }
-        }
-
-        function removeLocalAvatar() {
-            try {
-                localStorage.removeItem(AVATAR_KEY);
-                return true;
-            } catch (error) {
-                console.error("ลบ avatar ไม่สำเร็จ:", error);
-                return false;
-            }
-        }
 
         function showAvatar(url) {
             if (url) {
@@ -419,8 +130,7 @@
                         const ctx = canvas.getContext("2d");
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-                        resolve(compressedDataUrl);
+                        resolve(canvas.toDataURL("image/jpeg", quality));
                     };
 
                     img.onerror = () => reject(new Error("โหลดรูปไม่สำเร็จ"));
@@ -433,18 +143,17 @@
         }
 
         function loadProfilePage() {
-            const localProfile = getLocalProfile();
-            const avatar = getLocalAvatar();
+            const profile = getProfile();
 
-            if (localProfile) {
-                usernameInput.value = localProfile.username || "";
-                farmInput.value = localProfile.farmName || "";
-            } else {
-                usernameInput.value = "";
-                farmInput.value = "";
+            if (!profile) {
+                window.location.href = "index.html";
+                return;
             }
 
-            currentAvatarUrl = avatar || "";
+            usernameInput.value = profile.username || "";
+            farmInput.value = profile.farmName || "";
+            currentAvatarUrl = profile.avatar || "";
+
             showAvatar(currentAvatarUrl);
         }
 
@@ -457,19 +166,10 @@
             if (!file) return;
 
             try {
-                const smallImageUrl = await resizeImage(file, 256, 0.72);
-                currentAvatarUrl = smallImageUrl;
+                currentAvatarUrl = await resizeImage(file, 256, 0.72);
                 showAvatar(currentAvatarUrl);
-
-                const avatarSaved = saveLocalAvatar(currentAvatarUrl);
-
-                if (avatarSaved) {
-                    alert("อัปโหลดรูปโปรไฟล์สำเร็จ");
-                } else {
-                    alert("อัปโหลดรูปไม่สำเร็จ: รูปอาจมีขนาดใหญ่เกินไปสำหรับเบราว์เซอร์นี้");
-                }
-            } catch (error) {
-                console.error("อัปโหลดรูปไม่สำเร็จ:", error);
+                alert("เลือกรูปโปรไฟล์สำเร็จ กรุณากดบันทึกข้อมูลโปรไฟล์");
+            } catch {
                 alert("อัปโหลดรูปไม่สำเร็จ");
             } finally {
                 avatarInput.value = "";
@@ -479,20 +179,19 @@
         deleteAvatarBtn.addEventListener("click", () => {
             currentAvatarUrl = "";
             showAvatar("");
-
-            const avatarRemoved = removeLocalAvatar();
-            alert(avatarRemoved ? "ลบรูปโปรไฟล์แล้ว" : "ลบรูปไม่สำเร็จ");
         });
 
         saveProfileBtn.addEventListener("click", () => {
-            const payload = {
-                username: usernameInput.value.trim(),
-                farmName: farmInput.value.trim()
-            };
+            const ok = saveProfile({
+                farmName: farmInput.value.trim(),
+                avatar: currentAvatarUrl
+            });
 
-            const localSaved = saveLocalProfile(payload);
-            alert(localSaved ? "บันทึกข้อมูลโปรไฟล์สำเร็จ" : "บันทึกข้อมูลไม่สำเร็จ");
+            alert(ok ? "บันทึกข้อมูลโปรไฟล์สำเร็จ" : "บันทึกข้อมูลไม่สำเร็จ");
+            loadProfilePage();
         });
+
+        logoutBtn.addEventListener("click", logout);
 
         loadProfilePage();
     </script>

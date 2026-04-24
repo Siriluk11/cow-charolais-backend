@@ -36,6 +36,22 @@ function saveUsers(users) {
     localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
 }
 
+async function ensureDefaultAdmin() {
+    const users = getUsers();
+    const hasAdmin = users.some(user => user.username.toLowerCase() === "admin");
+
+    if (!hasAdmin) {
+        users.push({
+            username: "admin",
+            passwordHash: await sha256("Admin1234"),
+            role: "admin",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        saveUsers(users);
+    }
+}
+
 function getCurrentUser() {
     try {
         const raw = localStorage.getItem(AUTH_SESSION_KEY);
@@ -52,18 +68,34 @@ function requireLogin() {
     }
 }
 
+function requireAdmin() {
+    const session = getCurrentUser();
+    if (!session || session.role !== "admin") {
+        window.location.href = "index.html";
+    }
+}
+
 function logout() {
     localStorage.removeItem(AUTH_SESSION_KEY);
     window.location.href = "index.html";
 }
 
 async function registerUser(username, password) {
+    await ensureDefaultAdmin();
+
     username = normalizeUsername(username);
 
     if (!isValidUsername(username)) {
         return {
             ok: false,
             message: "ชื่อผู้ใช้ต้องมี 2–30 ตัว ใช้ภาษาไทย อังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่างได้"
+        };
+    }
+
+    if (username.toLowerCase() === "admin") {
+        return {
+            ok: false,
+            message: "ไม่สามารถใช้ชื่อผู้ใช้ admin ได้"
         };
     }
 
@@ -89,6 +121,7 @@ async function registerUser(username, password) {
     users.push({
         username,
         passwordHash,
+        role: "user",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     });
@@ -110,6 +143,8 @@ async function registerUser(username, password) {
 }
 
 async function loginUser(username, password) {
+    await ensureDefaultAdmin();
+
     username = normalizeUsername(username);
 
     if (!username || !password) {
@@ -138,18 +173,24 @@ async function loginUser(username, password) {
         };
     }
 
+    const role = user.role || "user";
+
     localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
         username: user.username,
+        role,
         loginAt: new Date().toISOString()
     }));
 
     return {
         ok: true,
+        role,
         message: "เข้าสู่ระบบสำเร็จ"
     };
 }
 
 async function resetPassword(username, newPassword) {
+    await ensureDefaultAdmin();
+
     username = normalizeUsername(username);
 
     if (!username) {
@@ -223,4 +264,26 @@ function saveProfile(profile) {
 
     localStorage.setItem(PROFILE_KEY_PREFIX + session.username, JSON.stringify(payload));
     return true;
+}
+function saveActivityLog(action, detail = "") {
+    const key = "charolais_activity_logs";
+    let logs = [];
+
+    try {
+        logs = JSON.parse(localStorage.getItem(key)) || [];
+    } catch {
+        logs = [];
+    }
+
+    const session = getCurrentUser();
+
+    logs.unshift({
+        username: session?.username || "guest",
+        role: session?.role || "unknown",
+        action,
+        detail,
+        createdAt: new Date().toLocaleString("th-TH")
+    });
+
+    localStorage.setItem(key, JSON.stringify(logs.slice(0, 200)));
 }
